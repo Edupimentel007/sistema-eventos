@@ -1,0 +1,18 @@
+{
+  "name": "sistema-eventos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gestão de eventos e portal de clientes — Etapa 1",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "bootstrap:owner": "node scripts/bootstrap-owner.js",
+    "seed:demo": "node scripts/seed-demo.js",
+    "test": "node --test",
+    "check": "node --check server/app.js && node --check public/app.js"
+  }
+}
