@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Gestão de eventos e portal de clientes — Etapa 1",
+  "description": "Gestão de eventos, portal de clientes e financeiro essencial",
   "engines": {
     "node": ">=24.0.0"
   },

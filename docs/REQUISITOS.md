@@ -1,6 +1,6 @@
 # Requisitos do sistema de eventos
 
-Estado: documento inicial, 27/10/2026. Este documento descreve o produto completo; a entrega inicial implementa apenas a **Etapa 1**. As demais etapas estão planejadas em [PLANO_IMPLEMENTACAO.md](PLANO_IMPLEMENTACAO.md).
+Estado: revisão de 29/10/2026. Este documento descreve o produto completo. A **Etapa 1** foi seguida por um incremento de interface responsiva e financeiro essencial, antecipado a pedido do proprietário. As partes ainda não implementadas estão em [PLANO_IMPLEMENTACAO.md](PLANO_IMPLEMENTACAO.md).
 
 ## Visão do produto
 
@@ -30,10 +30,10 @@ Na Etapa 1, o proprietário administra a composição de `event_team` e o respon
 2. **Permissões**: papéis de proprietário, equipe e cliente; cargo descritivo e permissões individuais da equipe por módulo e ação, mais vínculo obrigatório ao evento; vínculo de um ou mais clientes ao evento; filtragem no servidor e testes de isolamento entre clientes e entre integrantes da equipe. A atribuição automática de permissões por cargo ainda não existe.
 3. **Clientes**: cadastro, listagem, busca e atualização de nome, e-mail e telefone, com validação de e-mail único. A edição exige permissão e, para a equipe, vínculo do cliente a seus eventos ou autoria do cadastro. O e-mail de uma conta cliente já ativada não pode ser alterado por esse formulário.
 4. **Eventos**: código único gerado automaticamente e imutável; cadastro e atualização de nome, tipo, situação, data/horário/fuso, convidados, locais e endereços separados de cerimônia e festa, responsável, equipe, clientes e observações internas; listagem com busca e filtros básicos; página de detalhes. Não há exclusão de evento na Etapa 1. Dados ainda não modelados aparecem como módulos futuros, sem simular operação.
-5. **Painel inicial**: indicadores de eventos por situação e listas de próximos e recentes, com links quando a pessoa tem permissão de leitura de eventos. Indicadores financeiros, pendências de aprovação e outros contadores complexos só entram quando seus módulos persistentes existirem.
+5. **Painel inicial**: indicadores de eventos por situação, listas de próximos e recentes e, após o incremento financeiro, saldos financeiros com links quando a pessoa tem a permissão correspondente. Pendências de aprovação e outros contadores complexos entram quando seus módulos persistentes existirem.
 6. **Calendário básico**: datas de eventos cadastrados com navegação; o registro é um link para o detalhe somente para quem tem `events.read`. Quem tem apenas `calendar.read` vê uma entrada resumida, sem link para uma página negada. Reuniões, tarefas, reservas e outros tipos de compromisso entram nas etapas seguintes.
 7. **Portal conectado**: cliente autenticado vê apenas seus eventos, resumo, contagem regressiva, locais, horários e mapas. Marca, e-mail e telefone da empresa vêm de `BRAND_NAME`, `CONTACT_EMAIL` e `CONTACT_PHONE`, expostos pela API pública `/api/config`; o portal mostra ações de contato somente quando os respectivos valores foram configurados. Vários clientes podem acompanhar o mesmo evento.
-8. **PWA inicial**: manifesto com nome da marca configurada no servidor, ícones e layout responsivo; instalação quando o navegador oferecer esse recurso. Instalação não equivale a funcionamento offline nem garante entrega de notificações.
+8. **PWA inicial**: manifesto com nome provisório Jardim, ícones e layout responsivo; instalação quando o navegador oferecer esse recurso. O nome exibido na interface é configurável no servidor, mas o manifesto ainda precisa ser ajustado na publicação de outra marca. Instalação não equivale a funcionamento offline nem garante entrega de notificações.
 9. **Persistência e operação**: SQLite persistente via `node:sqlite`, com migrações; dados de demonstração fictícios identificados e separados de dados reais; configuração por variáveis de ambiente; instruções de inicialização, backup e recuperação.
 
 ### Critérios de aceite da Etapa 1
@@ -45,6 +45,16 @@ Na Etapa 1, o proprietário administra a composição de `event_team` e o respon
 - Inclusão e edição persistem após recarga, nova sessão e reinício da aplicação com o mesmo banco.
 - Os links do painel e calendário, quando exibidos a quem tem acesso aos detalhes, levam aos registros corretos; a equipe com acesso apenas ao calendário vê entradas sem link. Telas administrativas e portal funcionam em largura de celular.
 - Datas e horas são exibidas no fuso do evento e no padrão brasileiro, e valores monetários somente aparecem quando correspondem a dados implementados.
+
+## Incremento antecipado — interface e financeiro essencial
+
+Esta entrega amplia o administrativo e o portal sem concluir toda a Etapa 4. A navegação e os formulários são adaptados a desktop e celular, com hierarquia visual mais clara, controles maiores para toque e listas financeiras utilizáveis em telas estreitas. Os dados continuam online e persistentes; a PWA não passa a oferecer sincronização offline.
+
+- **Acesso:** proprietário tem acesso financeiro completo. A equipe precisa da permissão `finance.read` ou `finance.write`; contas vinculadas a evento também exigem vínculo em `event_team`. O cliente só consulta contas a receber de seus eventos quando marcadas para compartilhamento. A API aplica o recorte antes de montar resumos, listas e exportações.
+- **Registro:** contas a receber e a pagar podem ser associadas a evento ou registradas como despesas gerais. Cada conta tem valor em centavos inteiros, categoria, parcelas com valor e vencimento, e histórico de pagamentos parciais. O total das parcelas precisa ser igual ao valor da conta; pagamentos não podem superar o saldo e estornos preservam o registro original.
+- **Acompanhamento:** o administrativo apresenta saldos, valores recebidos e pagos, vencidos e próximos vencimentos, além de visão por evento. Filtros por vencimento, caixa por data de pagamento e exportação CSV obedecem às mesmas permissões da API. A receita prevista soma contas lançadas manualmente, sem vínculo automático com contrato.
+- **Portal:** somente contas a receber compartilhadas exibem valores informados pela equipe, parcelas e pagamentos reconhecidos. O compartilhamento pode ser para todos os clientes do evento ou restrito a um cliente. Custos previstos/realizados, contas a pagar, fornecedor e notas internas nunca entram na projeção do cliente.
+- **Limites:** pagamento é lançado manualmente após ocorrer fora do sistema. Não há cobrança bancária, comprovante por upload, conciliação, geração automática de parcelas por modelo ou renegociação contratual formal nesta entrega. Percentuais de pagamento não são fixados.
 
 ## Visões consolidadas do produto completo
 
@@ -80,9 +90,10 @@ Estas visões crescem conforme os módulos de origem são entregues. Cada cartã
 - Referências enviadas por cliente, comentários e solicitações de alteração. Sugestão, aprovação e aditivo contratual têm estados e fluxos distintos; upload de foto não altera escopo.
 - Checklists reutilizáveis de separação, carregamento, saída, entrega, montagem, conferência, desmontagem e retorno/devolução. Cada item registra quantidades previstas, separadas, carregadas e devolvidas, responsável, horário, observação e foto; faltas, danos e divergências são destacados. A interface móvel mostra claramente ações ainda não sincronizadas.
 
-### Etapa 4 — Financeiro
+### Etapa 4 — Financeiro completo (parte antecipada no incremento)
 
-- Contas a receber e pagar, parcelas, pagamentos parciais, categorias, formas de pagamento, comprovantes, despesas por fornecedor/evento e despesas gerais. Fluxo de caixa previsto e realizado, vencidos, resultado por evento, relatórios por período e CSV.
+- O incremento antecipado cobre o cadastro e a consulta de contas a receber/pagar, parcelas explícitas, pagamentos parciais, vencimentos, valores consolidados e visão limitada do cliente, conforme a seção anterior. A Etapa 4 continua necessária para os fluxos restantes.
+- Completar categorias e formas de pagamento configuráveis, modelos de parcelas por percentual ou valor, comprovantes protegidos, vínculo estruturado de fornecedores e fluxo de caixa previsto. Despesas gerais e por evento, caixa realizado por período e exportação CSV já existem no incremento antecipado.
 - Separar valor contratado, valor recebido, saldo a receber, custo previsto, custo realizado e resultado estimado. Valores são armazenados em centavos inteiros ou decimal exato, sem ponto flutuante para cálculo financeiro.
 - Modelos de pagamento aceitam percentuais ou valores; validam soma; suportam vencimento relativo à data do evento, inclusive após o evento. Renegociações geram histórico em vez de sobrescrever o acordo anterior. Percentuais padrão não são presumidos.
 - Portal exibe apenas valores contratados do cliente, parcelas, vencimentos, pagamentos reconhecidos e comprovantes explicitamente compartilhados. Não há cobrança bancária real sem integração configurada.

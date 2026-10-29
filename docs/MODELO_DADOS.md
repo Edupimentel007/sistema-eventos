@@ -1,6 +1,6 @@
 # Modelo inicial de dados
 
-Estado: proposta lógica inicial, 27/10/2026. **Etapa 1** indica entidades necessárias ao primeiro fluxo funcional; **futuro** indica a extensão prevista. O esquema físico e as migrações do código são a fonte da verdade dos nomes e tipos implementados. Campos sugeridos aqui não devem ser confundidos com funcionalidade já entregue.
+Estado: revisão de 29/10/2026. **Etapa 1** indica entidades do primeiro fluxo funcional; **incremento financeiro** indica o módulo antecipado; **futuro** indica a extensão prevista. O esquema físico e as migrações do código são a fonte da verdade dos nomes e tipos implementados. Campos sugeridos aqui não devem ser confundidos com funcionalidade já entregue.
 
 ## Decisões de modelagem
 
@@ -84,17 +84,30 @@ events ── invitations / audit_log
 
 Reserva conflitante: para um item, somar quantidades de reservas ativas cujos intervalos `[início da retirada, fim da devolução)` se sobrepõem. Rejeitar ou destacar quando essa soma ultrapassa a quantidade disponível. Uma consulta comercial não reserva automaticamente.
 
-## Extensões previstas — Etapa 4
+## Incremento financeiro antecipado
+
+As migrações `003_finance.sql` e `004_finance_payment_idempotency.sql` acrescentam `finance` às permissões individuais da equipe, criam as tabelas abaixo e uma chave opcional de idempotência em pagamentos. Cada consulta financeira do administrativo exige permissão de módulo e aplica `event_team` às contas vinculadas a evento. O proprietário pode consultar todos os registros. A projeção do portal usa somente contas a receber de eventos aos quais o cliente está vinculado e que foram marcadas explicitamente para compartilhamento.
+
+| Entidade | Dados centrais | Regra importante |
+| --- | --- | --- |
+| `financial_accounts` | direção receber/pagar, título, evento/cliente opcionais, categoria, fornecedor textual, valor em centavos, visibilidade, notas internas | Valor positivo; somente conta a receber ligada a evento pode ser compartilhada com cliente. O campo de fornecedor ainda não é um cadastro estruturado. |
+| `financial_installments` | conta, sequência, data civil de vencimento, valor em centavos | Parcelas de uma conta devem somar exatamente o valor contratado/previsto. Datas não dependem do fuso do processo. |
+| `financial_payments` | conta, data civil, valor, forma de pagamento textual, referência, notas, autor, estorno lógico | Não apagar pagamento registrado; estorno guarda data e motivo. A soma dos pagamentos ativos não ultrapassa o valor da conta. |
+| `financial_payment_allocations` | pagamento, parcela, valor alocado | Um pagamento parcial pode cobrir vencimentos em ordem; a soma das alocações equivale ao pagamento. |
+
+O administrativo calcula contratado, recebido, a receber, custo previsto, custo realizado, a pagar, resultado estimado e vencidos a partir de contas, parcelas e pagamentos não estornados. O portal usa uma projeção separada, sem custo, margem, contas a pagar ou notas internas. Não há transferência de dinheiro nem cobrança bancária no servidor.
+
+## Extensões restantes — Etapa 4
 
 | Entidade | Dados centrais | Regra importante |
 | --- | --- | --- |
 | `payment_template` e `payment_template_line` | percentual ou valor, vencimento absoluto/relativo, ordem | A soma deve fechar o total contratado; parcelas após o evento são válidas. |
-| `financial_obligation` | evento/fornecedor opcional, tipo receber/pagar, categoria, valor em centavos, estado | Separa contas do evento e gerais da empresa. |
-| `installment` | obrigação, sequência, valor, vencimento, histórico de renegociação | Valor contratado não é apagado por alteração de vencimento. |
-| `transaction` | parcela, valor pago/recebido, data, método, comprovante | Pagamentos parciais; não exceder saldo sem fluxo explícito de estorno/crédito. |
-| `financial_category` | nome, tipo, ativo | Configurável por empresa. |
+| `financial_category` | nome, tipo, ativo | Substituir a categoria textual por cadastro configurável preservando o histórico. |
+| `payment_method` | nome, ativo, regras de exibição | Substituir a forma textual por catálogo configurável. |
+| `financial_renegotiation` | conta, revisão, parcelas antigas/novas, justificativa, data e autor | Alterar o acordo por revisão, sem apagar vencimentos e valores anteriores. |
+| `financial_document` | arquivo protegido, conta/pagamento, visibilidade e participantes | Comprovante só pode ser baixado após autorização no servidor. |
 
-Projeções de painel e relatórios são calculadas das obrigações e transações: contratado, recebido, saldo, custo previsto, custo realizado e resultado estimado. CSV respeita os mesmos filtros e permissões da tela. Portal usa uma projeção própria, sem custo, margem ou obrigação a pagar interna.
+Modelos de pagamento por percentual ou valor, vencimentos relativos à data do evento, conciliação, relatórios mais completos e categorias estruturadas permanecem futuros. A exportação CSV implementada respeita os filtros e permissões da tela.
 
 ## Extensões previstas — Etapa 5
 
@@ -103,6 +116,7 @@ Projeções de painel e relatórios são calculadas das obrigações e transaç�
 ## Migrações, backup e privacidade
 
 - A migração `001_base.sql` cria o núcleo da Etapa 1. A migração `002_client_creator.sql` adiciona `clients.created_by` e o índice para restringir a lista de clientes da equipe sem impedir a preparação de novos eventos.
+- As migrações `003_finance.sql` e `004_finance_payment_idempotency.sql` introduzem permissões financeiras, contas, parcelas, pagamentos e alocações com valores em centavos inteiros e chave para evitar pagamento duplicado em nova tentativa.
 - Cada mudança de esquema tem migração versionada e revisável. Aplicar em ordem, com backup antes de migração em produção e procedimento de retorno documentado.
 - Backup inclui banco SQLite e arquivos privados em conjunto consistente. Restaurar em ambiente de teste periodicamente e verificar acesso, anexos e registros de auditoria. Em PostgreSQL, adaptar para `pg_dump`/backup gerenciado sem alterar regras de domínio.
 - Não inserir dados de demonstração no banco real. Seeds usam pessoas e contatos fictícios e uma flag/ambiente específico.

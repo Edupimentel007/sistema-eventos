@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { openDatabase, transaction } from './db.js';
+import { handleFinanceApi } from './finance.js';
 import {
   authenticatedUser, clearSessionCookie, createSession, hashPassword, newToken,
   revokeSession, sessionCookie, tokenHash, verifyPassword,
@@ -10,7 +11,7 @@ import {
 
 const statuses = ['orcamento', 'negociacao', 'contratado', 'em_execucao', 'concluido', 'cancelado'];
 const types = ['casamento', 'aniversario', 'corporativo', 'outro'];
-const modules = ['dashboard', 'clients', 'events', 'calendar'];
+const modules = ['dashboard', 'clients', 'events', 'calendar', 'finance'];
 
 class ApiError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -552,6 +553,11 @@ async function handleApi(db, req, res, url) {
 
   const user = requireUser(db, req);
   if (method === 'GET' && path === '/api/me') return json(res, 200, { user: userDto(db, user) });
+
+  if (path.startsWith('/api/finance') || /^\/api\/portal\/events\/[^/]+\/finance$/.test(path)) {
+    return handleFinanceApi({ db, req, res, url, user, json, bodyJson, fail,
+      requirePermission, requireCurrentUser, linkedClient, audit });
+  }
 
   if (method === 'GET' && path === '/api/clients') {
     requirePermission(db, user, 'clients');

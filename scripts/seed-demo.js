@@ -58,6 +58,55 @@ try {
       }
       db.prepare('INSERT INTO event_team (event_id, user_id, created_at) VALUES (?, ?, ?)')
         .run(eventId, ownerId, timestamp);
+
+      // Fluxo financeiro fictício: valor contratado, parcelas, recebimento parcial,
+      // custos do evento e uma despesa geral da empresa.
+      const financial = (direction, title, event, category, supplier, installments,
+        sharedWithClient = false) => {
+        const id = randomUUID();
+        const total = installments.reduce((sum, item) => sum + item.amountCents, 0);
+        db.prepare(`INSERT INTO financial_accounts
+          (id, direction, title, event_id, category, supplier_name, amount_cents,
+           shared_with_client, notes, created_by, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .run(id, direction, title, event, category, supplier, total,
+            sharedWithClient ? 1 : 0, 'Registro fictício para demonstração.',
+            ownerId, timestamp, timestamp);
+        const ids = installments.map((item, index) => {
+          const installmentId = randomUUID();
+          db.prepare(`INSERT INTO financial_installments
+            (id, account_id, sequence, due_date, amount_cents, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`)
+            .run(installmentId, id, index + 1, item.dueDate, item.amountCents,
+              timestamp, timestamp);
+          return installmentId;
+        });
+        return { id, installmentIds: ids };
+      };
+      const received = financial('receivable', 'Contrato de organização e decoração',
+        eventId, 'Serviços', '', [
+          { amountCents: 7_200_000, dueDate: '2026-10-20' },
+          { amountCents: 6_300_000, dueDate: '2027-04-20' },
+          { amountCents: 4_500_000, dueDate: '2027-06-01' },
+        ], true);
+      financial('payable', 'Flores e folhagens', eventId, 'Flores', 'Flora Exemplo', [
+        { amountCents: 2_100_000, dueDate: '2027-05-20' },
+        { amountCents: 2_100_000, dueDate: '2027-06-12' },
+      ]);
+      financial('payable', 'Locação de mobiliário', eventId, 'Mobiliário',
+        'Acervo Exemplo', [{ amountCents: 1_800_000, dueDate: '2027-06-10' }]);
+      financial('payable', 'Despesas administrativas', null, 'Outros', '',
+        [{ amountCents: 250_000, dueDate: '2026-10-15' }]);
+      const paymentId = randomUUID();
+      db.prepare(`INSERT INTO financial_payments
+        (id, account_id, paid_on, amount_cents, payment_method, reference,
+         notes, created_by, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run(paymentId, received.id, '2026-10-20', 7_200_000, 'Pix',
+          'DEMO-PIX-001', '', ownerId, timestamp);
+      db.prepare(`INSERT INTO financial_payment_allocations
+        (payment_id, installment_id, amount_cents) VALUES (?, ?, ?)`)
+        .run(paymentId, received.installmentIds[0], 7_200_000);
     });
     console.log(`Dados fictícios criados em ${resolve(demoPath)}.`);
     console.log('Contas: proprietario@example.com, ana.oliveira@example.com e lucas.pereira@example.com.');

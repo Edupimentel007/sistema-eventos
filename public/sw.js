@@ -1,4 +1,4 @@
-const CACHE = 'jardim-static-v2';
+const CACHE = 'jardim-static-v3';
 const STATIC = ['/app.css', '/app.js', '/icon.svg', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
 
 self.addEventListener('install', event => {

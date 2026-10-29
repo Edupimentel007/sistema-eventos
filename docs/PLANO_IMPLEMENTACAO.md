@@ -1,6 +1,6 @@
 # Plano de implementação por etapas
 
-Estado: plano inicial, 27/10/2026. O desenvolvimento começa pela Etapa 1 e cada marco só é concluído após validar seus fluxos e persistência. Os requisitos completos e as dúvidas configuráveis estão em [REQUISITOS.md](REQUISITOS.md); o desenho lógico está em [MODELO_DADOS.md](MODELO_DADOS.md). A avaliação de dispositivos está em [PWA_E_NOTIFICACOES.md](PWA_E_NOTIFICACOES.md).
+Estado: revisão de 29/10/2026. A Etapa 1 foi seguida de um incremento financeiro antecipado e uma reformulação responsiva, solicitados pelo proprietário. Cada marco só é concluído após validar seus fluxos e persistência. Os requisitos completos e as dúvidas configuráveis estão em [REQUISITOS.md](REQUISITOS.md); o desenho lógico está em [MODELO_DADOS.md](MODELO_DADOS.md). A avaliação de dispositivos está em [PWA_E_NOTIFICACOES.md](PWA_E_NOTIFICACOES.md).
 
 ## Inspeção e arquitetura adotada
 
@@ -36,7 +36,20 @@ Cada etapa deve entregar ao menos um fluxo ponta a ponta. As ações principais 
 
 **Critério de saída:** fluxo completo com duas contas de cliente distintas, ao menos um evento compartilhado entre dois clientes e outro evento privado, sem vazamento por API ou interface. Uma pessoa da equipe vinculada vê o evento em lista, painel, calendário e detalhe quando tem as permissões correspondentes; outra, com a mesma permissão de módulo mas sem vínculo, não o vê nem o altera por requisição direta. Remover o vínculo revoga o acesso. Se a equipe criar evento, o criador é vinculado na mesma transação. Recarga e reinício mantêm os dados. As entradas do calendário sem permissão de detalhe não são links quebrados. Todas as ações visíveis no primeiro fluxo funcionam. Recursos futuros devem estar identificados como pendentes, sem botões que fingem sucesso.
 
-**Pendências intencionais:** orçamento, contrato, briefing, reuniões, notificações, flores, acervo, financeiro e checklist só são implementados em etapas posteriores. O painel e calendário mostram apenas indicadores/compromissos cujas entidades já existem.
+**Pendências ao fim da Etapa 1:** orçamento, contrato, briefing, reuniões, notificações, flores, acervo, financeiro e checklist. O financeiro essencial foi antecipado no incremento seguinte; o painel e calendário só mostram indicadores/compromissos cujas entidades já existem.
+
+## Incremento antecipado — financeiro essencial e experiência responsiva
+
+**Objetivo:** melhorar o uso no computador e no celular e disponibilizar ao proprietário uma operação financeira inicial, com acesso controlado por perfil e evento. Este incremento não conclui a Etapa 4.
+
+1. Refinar cores, tipografia, hierarquia visual e navegação administrativa e do portal, preservando contraste, foco visível e formulários confortáveis no toque. Conferir páginas principais em larguras de celular e desktop.
+2. Migrar o banco para contas financeiras, parcelas, pagamentos e alocações em centavos inteiros. Acrescentar o módulo `finance` às permissões de equipe, sem concedê-lo automaticamente.
+3. Cadastrar contas a receber e a pagar, vinculadas a evento quando aplicável, com parcelas explícitas cujo valor total fecha a conta; permitir registrar pagamento parcial e estorná-lo com motivo, sem apagar o histórico.
+4. Oferecer resumo e visão por evento no administrativo, com vencimentos e saldos calculados a partir dos registros. Permissões e vínculo do evento valem para listas, detalhes, resumos e exportação.
+5. Mostrar no portal somente contas a receber explicitamente compartilhadas de eventos vinculados ao cliente. Contas a pagar, custos e observações internas permanecem inacessíveis.
+6. Validar persistência, cálculos em centavos, pagamento parcial/estorno, isolamento entre clientes e escopo financeiro da equipe. Conferir o fluxo em navegador em largura de celular e desktop.
+
+**Critério de saída:** proprietário cadastra conta com parcelas e registra pagamento parcial; resumo e saldo se atualizam após recarga. Cliente vinculado vê somente a cobrança compartilhada do seu evento. Integrante da equipe sem permissão financeira ou sem vínculo ao evento não acessa os valores por chamada direta. Não há cobrança bancária nem upload de comprovante neste marco.
 
 ## Etapa 2 — Comercial, planejamento e compromissos
 
@@ -64,16 +77,16 @@ Cada etapa deve entregar ao menos um fluxo ponta a ponta. As ações principais 
 
 **Critério de saída:** o cliente aprova uma revisão de ambiente, uma substituição relevante exige nova decisão; necessidades refletem a revisão válida; reserva conflitante ou acima do estoque é detectada; checklist persiste e registra faltas/danos. Testes cobrem visibilidade de arquivos e conflitos de reserva.
 
-## Etapa 4 — Financeiro
+## Etapa 4 — Complementação financeira
 
 **Objetivo:** acompanhar contrato, recebimentos, despesas e resultado sem expor custos ao cliente.
 
-1. Modelos configuráveis de pagamento por percentual ou valor, parcelas e vencimentos relativos, inclusive após o evento.
-2. Contas a receber/pagar, pagamentos parciais, fornecedores, categorias, formas e comprovantes.
-3. Renegociação com histórico, fluxo de caixa previsto/realizado, valores vencidos e resultado por evento.
-4. Painel financeiro, relatórios por período, CSV e projeção financeira própria do portal.
+1. Modelos configuráveis de pagamento por percentual ou valor, com vencimentos relativos à data do evento, inclusive após ele.
+2. Categorias e formas de pagamento configuráveis, fornecedor estruturado, comprovantes privados e controle de acesso no download.
+3. Renegociação formal com versões do acordo, fluxo de caixa previsto/realizado por período e conciliação conforme a operação da empresa.
+4. Ampliar relatórios, CSV e projeção financeira do portal para o acordo comercial versionado quando orçamento e contrato estiverem disponíveis.
 
-**Critério de saída:** parcelas fecham exatamente o contratado; recebimentos parciais alteram o saldo sem arredondamento indevido; despesas internas não aparecem no portal; renegociação preserva o histórico. Testes cobrem cálculos e autorização de comprovantes.
+**Critério de saída:** modelos geram parcelas que fecham exatamente o contratado e aceitam ajustes negociados; renegociação preserva o acordo anterior; relatórios reconciliam valores previstos e realizados; comprovantes são acessados apenas por pessoas autorizadas. Testes cobrem cálculos, versões e acesso aos arquivos.
 
 ## Etapa 5 — Integrações, pós-evento e revisão final
 
@@ -89,7 +102,7 @@ Cada etapa deve entregar ao menos um fluxo ponta a ponta. As ações principais 
 
 ## Roteiro de demonstração evolutiva
 
-Usar um **casamento fictício** com dois contratantes e uma pessoa de equipe. Na Etapa 1, criar o evento, vincular ambos, acessar por contas separadas e observar painel/calendário/portal. Na Etapa 2, registrar briefing, orçamento e sua aprovação, contrato, cronograma e reunião com respostas. Na Etapa 3, planejar flores e mobiliário, registrar aprovação, reserva e checklist. Na Etapa 4, adicionar parcelas e despesas com visão financeira separada. Na Etapa 5, concluir devoluções e acerto. Seeds nunca usam dados reais nem habilitam integrações externas automaticamente.
+Usar um **casamento fictício** com dois contratantes e uma pessoa de equipe. Na Etapa 1, criar o evento, vincular ambos, acessar por contas separadas e observar painel/calendário/portal. No incremento financeiro, registrar conta compartilhada, parcelas, recebimento parcial e despesa interna, conferindo as visões separadas do administrativo e do portal. Na Etapa 2, registrar briefing, orçamento e sua aprovação, contrato, cronograma e reunião com respostas. Na Etapa 3, planejar flores e mobiliário, registrar aprovação, reserva e checklist. Na Etapa 4, aplicar modelos, renegociar parcelas e conferir comprovantes protegidos. Na Etapa 5, concluir devoluções e acerto. Seeds nunca usam dados reais nem habilitam integrações externas automaticamente.
 
 ## Riscos e decisões abertas
 
