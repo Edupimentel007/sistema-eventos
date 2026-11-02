@@ -1,5 +1,5 @@
-const CACHE = 'paulo-static-v1';
-const STATIC = ['/app.css', '/calendar.css', '/features.css', '/app.js', '/calendar.js', '/media-ui.js', '/inventory-ui.js', '/messages-ui.js', '/logo-principal.png', '/logo-flor.png', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
+const CACHE = 'paulo-static-v2';
+const STATIC = ['/app.css', '/calendar.css', '/features.css', '/app.js', '/calendar.js', '/media-ui.js', '/inventory-ui.js', '/messages-ui.js', '/logo-wordmark.png', '/logo-flor.png', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(STATIC)));

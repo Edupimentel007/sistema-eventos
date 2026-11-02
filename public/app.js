@@ -78,7 +78,7 @@ const state = {user:null, config:{brandName:'Paulo Guimarães',contactEmail:'',c
 const allowed=(module,action='read') => state.user?.role==='owner' || !!state.user?.permissions?.[module]?.[action];
 const defaultAdminRoute=() => allowed('dashboard')?'/app':allowed('events')?'/app/eventos':allowed('calendar')?'/app/calendario':allowed('finance')?'/app/financeiro':allowed('inventory')?'/app/acervo':allowed('suppliers')?'/app/fornecedores':allowed('messages')?'/app/mensagens':allowed('clients')?'/app/clientes':'/app/sem-acesso';
 const THEME_KEY='paulo-guimaraes-theme';
-const brandLogo=(extra='')=>`<img class="brand-logo ${extra}" src="/logo-principal.png" alt="Paulo Guimarães — Decorações de Eventos">`;
+const brandLogo=(extra='')=>`<img class="brand-logo ${extra}" src="/logo-wordmark.png" alt="Paulo Guimarães — Decorações de Eventos">`;
 const currentTheme=()=>document.documentElement.dataset.theme==='dark'?'dark':'light';
 function themeButton() {
   const dark=currentTheme()==='dark'; const next=dark?'claro':'escuro';

@@ -485,12 +485,16 @@ html[data-theme="dark"] .theme-toggle:hover{background:var(--hover)}
 }
 .topbar-tools{display:flex;align-items:center;gap:12px;margin-left:auto}
 .topbar-tools .topbar-right{margin-left:0}
-.sidebar .brand{display:block;padding:0 8px 25px;white-space:normal}
-.sidebar .brand-logo{width:100%;max-width:220px;max-height:88px;object-position:left center}
+.sidebar .brand{display:flex;align-items:center;justify-content:center;min-height:112px;padding:0 0 25px;white-space:normal}
+.sidebar .brand-logo{width:100%;max-width:225px;max-height:100px;object-position:center}
 .mobile-brand{min-width:0}
-.brand-logo-mobile{display:block;width:142px;max-width:100%;max-height:52px;object-fit:contain;object-position:left center}
-.portal-nav .brand-logo{width:175px;max-height:65px;object-position:left center}
-.auth-art .brand-logo{width:clamp(240px,32vw,410px);max-height:155px;object-position:left center}
+.brand-logo-mobile{display:block;width:235px;max-width:100%;max-height:85px;object-fit:contain;object-position:center}
+.portal-nav{flex-direction:column;justify-content:center;gap:12px;padding-top:21px;padding-bottom:17px}
+.portal-nav .brand{justify-content:center;width:100%}
+.portal-nav .brand-logo{width:300px;max-height:112px;object-position:center}
+.portal-nav .nav-actions{justify-content:center}
+.auth-art .brand{display:flex;align-self:stretch;justify-content:center}
+.auth-art .brand-logo{width:min(100%,520px);max-height:190px;object-position:center}
 .auth-form-side{flex-direction:column}
 .auth-theme{display:flex;align-items:center;justify-content:flex-end;width:min(100%,410px);margin-bottom:20px}
 .portal-flower{display:block;width:min(22vw,220px);height:auto;object-fit:contain;opacity:.23;filter:invert(1);mix-blend-mode:screen}
@@ -499,12 +503,18 @@ html[data-theme="dark"] .portal-flower{filter:invert(1);mix-blend-mode:screen;op
 .sidebar .brand-flower,.portal-nav .brand-flower{filter:invert(1);mix-blend-mode:screen}
 .auth-art .brand-flower{width:88px;height:88px;filter:invert(1);mix-blend-mode:screen;opacity:.52}
 @media(max-width:760px){
+  .topbar{flex-direction:column;align-items:stretch;gap:8px}
+  .topbar .mobile-brand{display:flex;justify-content:center;width:100%}
+  .topbar-tools{align-self:flex-end}
   .topbar-tools{gap:7px}
   .theme-toggle .theme-label{display:none}
-  .mobile-brand .brand-logo-mobile{width:116px;max-height:44px}
-  .portal-nav .brand-logo{width:120px;max-height:46px}
+  .mobile-brand .brand-logo-mobile{width:min(72vw,275px);max-height:98px;filter:brightness(0)}
+  html[data-theme="dark"] .mobile-brand .brand-logo-mobile{filter:none}
+  .portal-nav{gap:8px;padding:13px 16px 12px}
+  .portal-nav .brand-logo{width:min(74vw,270px);max-height:102px}
+  .portal-nav .nav-actions{width:100%;justify-content:center}
   .portal-hero .portal-flower{right:5%;bottom:10px;width:100px;opacity:.12}
-  .auth-art .brand-logo{width:min(73vw,270px);max-height:104px}
+  .auth-art .brand-logo{width:min(82vw,350px);max-height:132px}
   .auth-art .brand-flower{display:none}
   .auth-theme{margin-bottom:16px}
 }
