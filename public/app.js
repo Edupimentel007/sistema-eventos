@@ -26,6 +26,8 @@ const icons = {
   ,truck:'<path d="M3 5h12v12H3zM15 9h4l3 3v5h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>'
   ,message:'<path d="M3 4h18v13H7l-4 4V4Z"/><path d="M7 9h10M7 13h7"/>'
   ,file:'<path d="M5 3h9l5 5v13H5V3Z"/><path d="M14 3v5h5M8 13h8M8 17h6"/>'
+  ,moon:'<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z"/>'
+  ,sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>'
 };
 const icon = (name) => `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${icons[name] || icons.flower}</svg>`;
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -72,9 +74,30 @@ const wallToIso = (date,time,tz) => {
   return new Date(utc).toISOString();
 };
 const initials = name => (name || 'U').trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase() || '').join('');
-const state = {user:null, config:{brandName:'Jardim',contactEmail:'',contactPhone:'',defaultTimezone:'America/Sao_Paulo'}, configLoaded:false, month:new Date().toISOString().slice(0,7), eventList:[], clientList:[], teamList:[], renderId:0};
+const state = {user:null, config:{brandName:'Paulo Guimarães',contactEmail:'',contactPhone:'',defaultTimezone:'America/Sao_Paulo'}, configLoaded:false, month:new Date().toISOString().slice(0,7), eventList:[], clientList:[], teamList:[], renderId:0};
 const allowed=(module,action='read') => state.user?.role==='owner' || !!state.user?.permissions?.[module]?.[action];
 const defaultAdminRoute=() => allowed('dashboard')?'/app':allowed('events')?'/app/eventos':allowed('calendar')?'/app/calendario':allowed('finance')?'/app/financeiro':allowed('inventory')?'/app/acervo':allowed('suppliers')?'/app/fornecedores':allowed('messages')?'/app/mensagens':allowed('clients')?'/app/clientes':'/app/sem-acesso';
+const THEME_KEY='paulo-guimaraes-theme';
+const brandLogo=(extra='')=>`<img class="brand-logo ${extra}" src="/logo-principal.png" alt="Paulo Guimarães — Decorações de Eventos">`;
+const currentTheme=()=>document.documentElement.dataset.theme==='dark'?'dark':'light';
+function themeButton() {
+  const dark=currentTheme()==='dark'; const next=dark?'claro':'escuro';
+  return `<button type="button" class="theme-toggle" data-action="theme-toggle" aria-label="Ativar tema ${next}" aria-pressed="${dark}" title="Ativar tema ${next}">${icon(dark?'sun':'moon')}<span class="theme-label">Tema ${next}</span></button>`;
+}
+function applyTheme(theme,persist=true) {
+  const selected=theme==='dark'?'dark':'light';
+  document.documentElement.dataset.theme=selected;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',selected==='dark'?'#171717':'#f7f7f5');
+  if(persist) { try { localStorage.setItem(THEME_KEY,selected); } catch {} }
+  document.querySelectorAll('[data-action="theme-toggle"]').forEach(button=>{
+    const dark=selected==='dark'; const next=dark?'claro':'escuro';
+    button.setAttribute('aria-label',`Ativar tema ${next}`);
+    button.setAttribute('aria-pressed',String(dark));
+    button.setAttribute('title',`Ativar tema ${next}`);
+    button.innerHTML=`${icon(dark?'sun':'moon')}<span class="theme-label">Tema ${next}</span>`;
+  });
+}
+applyTheme(currentTheme(),false);
 
 async function api(path, options={}) {
   const response = await fetch(path,{credentials:'same-origin',cache:'no-store',headers:{'Accept':'application/json',...(options.body ? {'Content-Type':'application/json'} : {})},...options});
@@ -92,18 +115,18 @@ function html(node) { app.innerHTML=node; }
 const navItem=(path,label,ico,active) => `<a class="nav-link ${active===path?'active':''}" href="${path}" data-nav="${path}">${icon(ico)}<span>${label}</span></a>`;
 function adminShell(content,active='/app') {
   const u=state.user; const owner=u.role==='owner';
-  return `<div class="app-shell"><aside class="sidebar"><a class="brand" href="/app" data-nav="/app"><span class="brand-mark">✻</span><span>${esc(state.config.brandName)}<small>Gestão de eventos</small></span></a>
+  return `<div class="app-shell"><aside class="sidebar"><a class="brand" href="/app" data-nav="/app">${brandLogo()}</a>
     <div class="nav-label">Operação</div>${allowed('dashboard')?navItem('/app','Visão geral','home',active):''}${allowed('events')?navItem('/app/eventos','Eventos','flower',active):''}${allowed('calendar')?navItem('/app/calendario','Agenda','calendar',active):''}${allowed('inventory')?navItem('/app/acervo','Acervo e estoque','box',active):''}
     <div class="nav-label">Administração</div>${allowed('finance')?navItem('/app/financeiro','Financeiro','wallet',active):''}${allowed('suppliers')?navItem('/app/fornecedores','Fornecedores','truck',active):''}${allowed('messages')?navItem('/app/mensagens','Mensagens','message',active):''}${allowed('clients')?navItem('/app/clientes','Clientes','users',active):''}${owner?navItem('/app/equipe','Equipe e acessos','users',active):''}
     <div class="side-bottom"><div class="side-user"><div class="avatar">${esc(initials(u.name))}</div><div><strong>${esc(u.name)}</strong><small>${owner?'Proprietário': 'Equipe'}</small></div></div><button class="side-logout" data-action="logout">Sair da conta</button></div>
-  </aside><div class="main"><div class="content"><header class="topbar"><a class="mobile-brand" href="/app" data-nav="/app"><span class="brand-mark">✻</span><strong>${esc(state.config.brandName)}</strong></a><span class="today">${esc(todayLabel())}</span><span class="topbar-right"><span>${owner?'Proprietário':'Equipe'}</span><span class="avatar" aria-hidden="true">${esc(initials(u.name))}</span></span></header>${content}</div></div>
+  </aside><div class="main"><div class="content"><header class="topbar"><a class="mobile-brand" href="/app" data-nav="/app">${brandLogo('brand-logo-mobile')}</a><span class="today">${esc(todayLabel())}</span><div class="topbar-tools">${themeButton()}<span class="topbar-right"><span>${owner?'Proprietário':'Equipe'}</span><span class="avatar" aria-hidden="true">${esc(initials(u.name))}</span></span></div></header>${content}</div></div>
   <nav class="mobile-nav" aria-label="Navegação principal">${allowed('dashboard')?`<a href="/app" data-nav="/app" class="${active==='/app'?'active':''}">${icon('home')}<span>Início</span></a>`:''}${allowed('events')?`<a href="/app/eventos" data-nav="/app/eventos" class="${active==='/app/eventos'?'active':''}">${icon('flower')}<span>Eventos</span></a>`:''}${allowed('calendar')?`<a href="/app/calendario" data-nav="/app/calendario" class="${active==='/app/calendario'?'active':''}">${icon('calendar')}<span>Agenda</span></a>`:''}${allowed('finance')?`<a href="/app/financeiro" data-nav="/app/financeiro" class="${active==='/app/financeiro'?'active':''}">${icon('wallet')}<span>Financeiro</span></a>`:''}<details class="mobile-more"><summary class="${['/app/clientes','/app/equipe','/app/acervo','/app/fornecedores','/app/mensagens'].includes(active)?'active':''}">${icon('menu')}<span>Mais</span></summary><div class="mobile-more-panel">${allowed('inventory')?`<a href="/app/acervo" data-nav="/app/acervo">${icon('box')} Acervo e estoque</a>`:''}${allowed('suppliers')?`<a href="/app/fornecedores" data-nav="/app/fornecedores">${icon('truck')} Fornecedores</a>`:''}${allowed('messages')?`<a href="/app/mensagens" data-nav="/app/mensagens">${icon('message')} Mensagens</a>`:''}${allowed('clients')?`<a href="/app/clientes" data-nav="/app/clientes">${icon('users')} Clientes</a>`:''}${owner?`<a href="/app/equipe" data-nav="/app/equipe">${icon('users')} Equipe e acessos</a>`:''}<button data-action="logout">Sair da conta</button></div></details></nav></div>`;
 }
 function portalShell(content) {
-  return `<div class="portal-shell"><header class="portal-nav"><a class="brand" href="/portal" data-nav="/portal"><span class="brand-mark">✻</span> ${esc(state.config.brandName)}</a><div class="nav-actions"><a href="/portal" data-nav="/portal">Meus eventos</a><a href="/portal/notificacoes" data-nav="/portal/notificacoes">Notificações</a><span class="small portal-user-name">${esc(state.user.name)}</span><button data-action="logout">Sair</button></div></header><main class="portal-main">${content}</main></div>`;
+  return `<div class="portal-shell"><header class="portal-nav"><a class="brand" href="/portal" data-nav="/portal">${brandLogo()}</a><div class="nav-actions"><a href="/portal" data-nav="/portal">Meus eventos</a><a href="/portal/notificacoes" data-nav="/portal/notificacoes">Notificações</a><span class="small portal-user-name">${esc(state.user.name)}</span>${themeButton()}<button data-action="logout">Sair</button></div></header><main class="portal-main">${content}</main></div>`;
 }
 function authShell(content) {
-  return `<div class="auth-page"><div class="auth-art"><a class="brand" href="/" data-nav="/"><span class="brand-mark">✻</span> ${esc(state.config.brandName)}</a><blockquote>Os detalhes que tornam cada celebração inesquecível.</blockquote><small>Planejamento de eventos com cuidado, beleza e clareza.</small></div><main class="auth-form-side"><div class="auth-card">${content}</div></main></div>`;
+  return `<div class="auth-page"><div class="auth-art"><a class="brand" href="/" data-nav="/">${brandLogo()}</a><img class="brand-flower" src="/logo-flor.png" alt="" aria-hidden="true"><blockquote>Os detalhes que tornam cada celebração inesquecível.</blockquote><small>Planejamento de eventos com cuidado, beleza e clareza.</small></div><main class="auth-form-side"><div class="auth-theme">${themeButton()}</div><div class="auth-card">${content}</div></main></div>`;
 }
 function loginPage() {
   html(authShell(`<div class="eyebrow">Bem-vindo de volta</div><h1>Entre no seu espaço</h1><p>Acompanhe cada detalhe da sua celebração.</p><form data-form="login"><div class="field"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" required></div><div class="field"><label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" required></div><button class="button" type="submit">Entrar ${icon('arrow')}</button></form><p class="note">Problemas para acessar? Peça à equipe um link de recuperação.</p>`));
@@ -276,7 +299,7 @@ async function portalHomePage() {
 async function portalEventPage(id) {
   const [er,fr]=await Promise.all([api(`/api/portal/events/${encodeURIComponent(id)}`),api(`/api/portal/events/${encodeURIComponent(id)}/finance`)]); const e=er.event; const cd=countdown(e.startAt);
   const ceremonyMap=mapLink(e.ceremonyMapUrl,e.ceremonyAddress); const receptionMap=mapLink(e.receptionMapUrl,e.receptionAddress);
-  html(portalShell(`<a class="text-link small" href="/portal" data-nav="/portal">← Meus eventos</a><div class="portal-hero portal-section"><div><div class="eyebrow">${esc(e.code||'Sua celebração')}</div><h1>${esc(e.name)}</h1><p>${dateLabel(e.startAt,e.timezone)} · ${timeLabel(e.startAt,e.timezone)}${endTimeLabel(e.startAt,e.endAt,e.timezone)}</p></div><div class="countdown"><strong>${cd.number}</strong><span>${cd.label}</span></div></div>
+  html(portalShell(`<a class="text-link small" href="/portal" data-nav="/portal">← Meus eventos</a><div class="portal-hero portal-section"><img class="brand-flower portal-flower" src="/logo-flor.png" alt="" aria-hidden="true"><div><div class="eyebrow">${esc(e.code||'Sua celebração')}</div><h1>${esc(e.name)}</h1><p>${dateLabel(e.startAt,e.timezone)} · ${timeLabel(e.startAt,e.timezone)}${endTimeLabel(e.startAt,e.endAt,e.timezone)}</p></div><div class="countdown"><strong>${cd.number}</strong><span>${cd.label}</span></div></div>
     <div class="grid two portal-section"><section class="panel"><div class="panel-head"><h2>Informações do evento</h2></div><dl class="facts"><div class="fact"><dt>Tipo</dt><dd>${esc(typeNames[e.type]||e.type)}</dd></div><div class="fact"><dt>Situação</dt><dd>${badge(e.status)}</dd></div><div class="fact"><dt>Data</dt><dd>${dateLabel(e.startAt,e.timezone)}</dd></div><div class="fact"><dt>Horário</dt><dd>${timeLabel(e.startAt,e.timezone)}${endTimeLabel(e.startAt,e.endAt,e.timezone)}</dd></div></dl></section>
     <section class="panel"><div class="panel-head"><h2>Locais</h2></div><dl class="facts"><div class="fact"><dt>Cerimônia</dt><dd>${esc(e.ceremonyName||'A definir')}</dd>${e.ceremonyAddress?`<div class="small">${esc(e.ceremonyAddress)}</div>`:''}${ceremonyMap?`<a class="small" href="${esc(ceremonyMap)}" target="_blank" rel="noopener noreferrer">Abrir no mapa ↗</a>`:''}</div><div class="fact"><dt>Festa</dt><dd>${esc(e.receptionName||'A definir')}</dd>${e.receptionAddress?`<div class="small">${esc(e.receptionAddress)}</div>`:''}${receptionMap?`<a class="small" href="${esc(receptionMap)}" target="_blank" rel="noopener noreferrer">Abrir no mapa ↗</a>`:''}</div></dl></section></div>
     <section class="panel portal-section"><div class="panel-head"><h2>Financeiro compartilhado</h2></div>${fr.accounts?.length?`<div class="grid three finance-summary"><div><span>Valores informados pela equipe</span><strong>${moneyCents(fr.summary?.contractedCents)}</strong></div><div><span>Pagamentos reconhecidos</span><strong>${moneyCents(fr.summary?.receivedCents)}</strong></div><div><span>Saldo a pagar</span><strong>${moneyCents(fr.summary?.receivableCents)}</strong></div></div><h3 class="portal-section">Parcelas</h3><div class="installment-list">${fr.accounts.flatMap(a=>(a.installments||[]).map(i=>({...i,accountTitle:a.title}))).sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')).map(i=>`<div class="installment-row"><div><strong>${esc(i.accountTitle)}</strong><small>Vence em ${dateOnlyLabel(i.dueDate)} · ${i.status==='paid'?'Pago':i.status==='overdue'?'Vencido':i.status==='partial'?'Pagamento parcial':'Em aberto'}</small></div><div class="align-right"><strong>${moneyCents(i.amountCents)}</strong><small>Saldo ${moneyCents(i.balanceCents)}</small></div></div>`).join('')}</div>${fr.accounts.some(a=>a.payments?.length)?`<h3 class="portal-section">Pagamentos reconhecidos</h3><div class="installment-list">${fr.accounts.flatMap(a=>(a.payments||[]).map(p=>({...p,accountTitle:a.title}))).sort((a,b)=>(b.paidOn||'').localeCompare(a.paidOn||'')).map(p=>`<div class="installment-row"><div><strong>${esc(p.accountTitle)}</strong><small>${dateOnlyLabel(p.paidOn)} · ${esc(p.paymentMethod||'Forma não informada')}</small></div><strong>${moneyCents(p.amountCents)}</strong></div>`).join('')}</div>`:''}`:'<p>A equipe ainda não compartilhou valores financeiros deste evento.</p>'}<p class="small portal-section">Pagamentos são registrados pela equipe. Este portal não realiza cobrança ou assinatura de contrato.</p></section>
@@ -527,6 +550,7 @@ document.addEventListener('click',async event=>{
   const link=event.target.closest('a[data-nav]'); if(link) { event.preventDefault(); go(link.dataset.nav); return; }
   const inventoryAction=event.target.closest('[data-inv-action]'); if(inventoryAction) { event.preventDefault(); await inventoryUi.handleAction(inventoryAction); return; }
   const action=event.target.closest('[data-action]'); if(!action) return;
+  if (action.dataset.action==='theme-toggle') { applyTheme(currentTheme()==='dark'?'light':'dark'); return; }
   if (action.dataset.action==='logout') { try { await api('/api/auth/logout',{method:'POST'}); } catch {} state.user=null; go('/entrar'); }
   if (action.dataset.action==='month-prev' || action.dataset.action==='month-next') {
     const [y,m]=state.month.split('-').map(Number); const delta=action.dataset.action==='month-prev'?-1:1; const d=new Date(Date.UTC(y,m-1+delta,1)); state.month=d.toISOString().slice(0,7); render();

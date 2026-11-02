@@ -85,3 +85,26 @@
   .schedule-hour-labels span{font-size:.6rem;padding-right:4px}
   .schedule-positioned .schedule-event{font-size:.7rem}
 }
+
+/* Agenda acompanha a paleta grafite em ambos os temas. */
+.schedule-weekdays{background:var(--soft)}
+.schedule-month-day.outside{background:var(--hover)}
+.schedule-month-day.outside .schedule-day-number{color:var(--muted)}
+.schedule-hour-labels{background:var(--soft)}
+.schedule-event{background:#e7e4e5;color:#343034;border-color:#716b70}
+.schedule-event.orcamento{background:#eeeae8;color:#453f3d;border-color:#9c928e}
+.schedule-event.negociacao{background:#e5e1e0;color:#403b3b;border-color:#80797a}
+.schedule-event.em_execucao{background:#dddbdf;color:#37343d;border-color:#67616b}
+.schedule-event.concluido{background:#e9e8e8;color:#4e4a4d;border-color:#8d888a}
+.schedule-event.cancelado{background:#f2e5e4;color:#713f3c;border-color:#a9625c}
+.schedule-dots i,.schedule-dots i.orcamento,.schedule-dots i.negociacao{background:#69646a}
+html[data-theme="dark"] .schedule-month-day.today .schedule-day-number{background:#e8e4e5;color:#242326}
+html[data-theme="dark"] .schedule-event{background:#403c40;color:#f4f0f1;border-color:#bdb5ba}
+html[data-theme="dark"] .schedule-event.orcamento{background:#49413e;color:#f2e7e2;border-color:#c8b8af}
+html[data-theme="dark"] .schedule-event.negociacao{background:#423d3d;color:#f2e9e9;border-color:#bcb0b0}
+html[data-theme="dark"] .schedule-event.em_execucao{background:#3d3a42;color:#efebf3;border-color:#b8b0c0}
+html[data-theme="dark"] .schedule-event.concluido{background:#3d3b3e;color:#eae6e8;border-color:#aaa4a8}
+html[data-theme="dark"] .schedule-event.cancelado{background:#513a39;color:#f8e2df;border-color:#d28b84}
+html[data-theme="dark"] .schedule-dots i,
+html[data-theme="dark"] .schedule-dots i.orcamento,
+html[data-theme="dark"] .schedule-dots i.negociacao{background:#d0c9cc}

@@ -116,7 +116,7 @@ function defaultTimezone() {
 }
 
 function publicConfig() {
-  const brandName = process.env.BRAND_NAME?.trim().slice(0, 120) || 'Jardim';
+  const brandName = process.env.BRAND_NAME?.trim().slice(0, 120) || 'Paulo Guimarães';
   const contactEmail = process.env.CONTACT_EMAIL?.trim().slice(0, 254) || '';
   const contactPhone = process.env.CONTACT_PHONE?.trim().slice(0, 40) || '';
   return { brandName, contactEmail, contactPhone, defaultTimezone: defaultTimezone() };

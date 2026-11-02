@@ -89,3 +89,16 @@
   .portal-nav .nav-actions>a[href='/portal/notificacoes']{display:inline-flex;font-size:.76rem}
 }
 @media(max-width:390px){.inventory-grid{grid-template-columns:1fr 1fr}.inventory-cover{height:100px}}
+
+.inventory-cover{background:linear-gradient(140deg,#eeebec,#ddd9db);color:#827b80}
+.badge.message-scheduled,.badge.message-processing{background:#e8e6e7;color:#4e484d}
+.badge.message-sent{background:#e4eae5;color:#385a43}
+.badge.message-failed{background:#f2e4e3;color:#8e4641}
+.badge.message-cancelled{background:var(--soft);color:var(--muted)}
+html[data-theme="dark"] .inventory-cover{background:linear-gradient(140deg,#353136,#484247);color:#b4aaaf}
+html[data-theme="dark"] .inventory-card:hover{box-shadow:0 16px 34px #0005}
+html[data-theme="dark"] .badge.message-scheduled,
+html[data-theme="dark"] .badge.message-processing{background:#454146;color:#f0e9ec}
+html[data-theme="dark"] .badge.message-sent{background:#304237;color:#d7f0df}
+html[data-theme="dark"] .badge.message-failed{background:#563b3a;color:#ffdcd9}
+html[data-theme="dark"] .badge.message-cancelled{background:#383438;color:#d1c8cc}

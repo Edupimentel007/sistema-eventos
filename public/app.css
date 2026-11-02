@@ -359,3 +359,152 @@ h3{font-weight:700}
   .finance-summary>div{padding:14px 15px}
   .finance-summary>div>strong{font-size:1.08rem}
 }
+
+/* Identidade Paulo Guimarães: grafite, branco e cinzas neutros. */
+:root{
+  color-scheme:light;
+  --ink:#242326;--muted:#5f5c60;--deep:#262427;--deep-2:#161518;
+  --rose:#726d70;--rose-soft:#eae8e8;--gold:#686367;--gold-soft:#eeecec;
+  --canvas:#f4f3f2;--paper:#fff;--line:#d8d5d5;--soft:#efedec;
+  --accent:#3f3b3f;--accent-soft:#e8e5e5;--copper:#625b60;
+  --danger:#a43737;--shadow:0 10px 32px rgba(29,27,30,.055);
+  --input:#fff;--hover:#f6f5f4;--sidebar-link:#e8e4e4;
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#f4f2f1;--muted:#c7c1c1;--deep:#1d1b1e;--deep-2:#100f11;
+  --rose:#c9c2c4;--rose-soft:#3a3538;--gold:#c5bfc1;--gold-soft:#363235;
+  --canvas:#161518;--paper:#242225;--line:#494549;--soft:#302d31;
+  --accent:#f0eae9;--accent-soft:#3b373b;--copper:#d8d1d1;
+  --danger:#f0a09a;--shadow:0 10px 32px rgba(0,0,0,.18);
+  --input:#2e2b2f;--hover:#343135;--sidebar-link:#ede9e9;
+}
+body{background:var(--canvas);color:var(--ink)}
+:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--copper);outline-offset:3px}
+.eyebrow{color:var(--copper)}
+.sidebar,.portal-nav{background:var(--deep);color:#f8f6f5}
+.nav-label,.sidebar .brand small{color:#c4bdc0}
+.nav-link,.side-logout{color:var(--sidebar-link)}
+.nav-link:hover{background:#3a373b;color:#fff}
+.nav-link.active{background:#49454a;color:#fff;box-shadow:inset 3px 0 #d9d1d2}
+.side-bottom{border-top-color:#514d51}
+.side-user small{color:#ccc6c8}
+.brand-mark{border-color:#8d8589;color:#f3ebed}
+.avatar{background:#e0d9dc;color:#242326}
+.button{background:var(--deep);color:#fff;border-color:var(--deep)}
+.button:hover{background:var(--deep-2)}
+.button.secondary{background:var(--paper);color:var(--ink);border-color:var(--line)}
+.button.secondary:hover{background:var(--hover)}
+.button.ghost{color:var(--ink)}
+.button.danger{background:#963e3a;color:#fff}
+.text-link,.fact a,.filter-panel>summary{color:var(--accent)}
+.text-link:hover{color:var(--ink)}
+.stat-card:hover,.portal-event-card:hover{border-color:var(--muted)}
+.stat-card:before,.stat-card.rose:before,.stat-card.gold:before,.stat-card.green:before{background:#9d969a}
+.stat-card .stat-foot{color:var(--accent)}
+.date-tile{background:var(--gold-soft);color:var(--ink)}
+.badge{background:#e8e6e6;color:#454145}
+.badge.orcamento{background:#e9e5e3;color:#564e4a}
+.badge.negociacao{background:#ede8e2;color:#5b5146}
+.badge.contratado,.badge.paid,.badge.pago,.badge.recebido{background:#e7e4e5;color:#413d40}
+.badge.em_execucao{background:#e2e8eb;color:#3d5967}
+.badge.concluido{background:#e8e7e7;color:#514e51}
+.badge.cancelado,.badge.overdue,.badge.atrasado,.badge.vencido{background:#f5e3e2;color:#8e3735}
+.field label{color:var(--ink)}
+.field input,.field select,.field textarea,.check-option,.invite-result input{
+  background:var(--input);color:var(--ink);border-color:var(--line)
+}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);opacity:.85}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--copper);box-shadow:0 0 0 3px rgba(129,119,124,.18)}
+.table tr:hover td{background:var(--hover)}
+.notice{background:var(--soft);color:var(--ink);border-color:var(--line)}
+.notice.error{background:#f5e5e3;color:#823c36;border-color:#e6c8c4}
+.notice.success{background:#e7ede8;color:#305943;border-color:#cbdcd0}
+.weekday,.finance-tabs{background:var(--soft)}
+.cal-day.outside{background:var(--hover)}
+.cal-day.today{background:var(--accent-soft)}
+.cal-event{background:var(--soft);color:var(--ink)}
+.cal-event.orcamento,.cal-event.negociacao{background:var(--gold-soft);color:var(--ink)}
+.auth-art{background:linear-gradient(145deg,#242224,#373438)}
+.auth-art small,.auth-art blockquote{color:#f3f0ef}
+.detail-hero,.portal-hero{background:linear-gradient(130deg,#272528,#39363a)}
+.detail-hero .eyebrow,.portal-hero .eyebrow{color:#e3dadc}
+.detail-hero p,.portal-hero p{color:#e8e2e4}
+.portal-shell{background:var(--canvas)}
+.portal-nav button{color:#eee9eb}
+.spinner{border-color:var(--line);border-top-color:var(--accent)}
+.finance-tabs a,.finance-tabs button{color:var(--muted)}
+.finance-tabs .active{background:var(--paper);color:var(--ink)}
+.money-stat.positive strong,.finance-kpi.positive strong,.kpi-card.positive strong{color:var(--ink)}
+.mobile-nav,.form-actions{background:var(--paper)}
+.mobile-nav>a.active,.mobile-more[open]>summary,.mobile-more>summary.active{color:var(--ink);background:var(--accent-soft)}
+.mobile-more-panel{background:var(--paper);border-color:var(--line)}
+.mobile-more-panel a,.mobile-more-panel button{color:var(--ink)}
+.mobile-more-panel a:hover,.mobile-more-panel button:hover{background:var(--hover)}
+#toast{background:#343135;color:#fff}
+
+/* Os controles ficam próximos da conta em desktop e acessíveis no celular. */
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:.76rem;font-weight:700;white-space:nowrap}
+.theme-toggle:hover{background:var(--hover)}
+.theme-toggle svg{width:16px;height:16px}
+.brand-logo{display:block;max-width:100%;height:auto;object-fit:contain}
+.brand-flower{display:block;width:30px;height:30px;object-fit:contain;mix-blend-mode:multiply}
+html[data-theme="dark"] .brand-flower{filter:invert(1);mix-blend-mode:screen}
+
+html[data-theme="dark"] .button{background:#e8e4e5;color:#242326;border-color:#e8e4e5}
+html[data-theme="dark"] .button:hover{background:#fff}
+html[data-theme="dark"] .button.secondary{background:var(--paper);color:var(--ink);border-color:#716b70}
+html[data-theme="dark"] .button.secondary:hover{background:var(--hover)}
+html[data-theme="dark"] .button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .button.danger{background:#9e4540;color:#fff;border-color:#9e4540}
+html[data-theme="dark"] .badge{background:#3a363a;color:#ece8e9}
+html[data-theme="dark"] .badge.orcamento{background:#4a403b;color:#f2e2d6}
+html[data-theme="dark"] .badge.negociacao{background:#4a413d;color:#f5e5da}
+html[data-theme="dark"] .badge.contratado,
+html[data-theme="dark"] .badge.paid,
+html[data-theme="dark"] .badge.pago,
+html[data-theme="dark"] .badge.recebido{background:#494549;color:#f0ecee}
+html[data-theme="dark"] .badge.em_execucao{background:#34434a;color:#d8ebf3}
+html[data-theme="dark"] .badge.concluido{background:#414043;color:#e7e3e4}
+html[data-theme="dark"] .badge.cancelado,
+html[data-theme="dark"] .badge.overdue,
+html[data-theme="dark"] .badge.atrasado,
+html[data-theme="dark"] .badge.vencido{background:#543735;color:#ffd8d5}
+html[data-theme="dark"] .notice.error{background:#4a3333;color:#ffd9d7;border-color:#745050}
+html[data-theme="dark"] .notice.success{background:#304036;color:#e2f2e6;border-color:#4a6b53}
+html[data-theme="dark"] .detail-hero .badge{background:#ece8e7;color:#282629}
+html[data-theme="dark"] .stat-card:before{background:#aaa2a5}
+html[data-theme="dark"] .stat-card .stat-foot{color:#e9e3e5}
+html[data-theme="dark"] .auth-page{background:var(--canvas)}
+html[data-theme="dark"] .auth-art{background:linear-gradient(145deg,#1d1b1e,#302d31)}
+html[data-theme="dark"] .theme-toggle{background:var(--paper);color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .theme-toggle:hover{background:var(--hover)}
+@media(max-width:760px){
+  .theme-toggle{min-width:36px;padding:7px}
+  .brand-logo{max-height:55px}
+}
+.topbar-tools{display:flex;align-items:center;gap:12px;margin-left:auto}
+.topbar-tools .topbar-right{margin-left:0}
+.sidebar .brand{display:block;padding:0 8px 25px;white-space:normal}
+.sidebar .brand-logo{width:100%;max-width:220px;max-height:88px;object-position:left center}
+.mobile-brand{min-width:0}
+.brand-logo-mobile{display:block;width:142px;max-width:100%;max-height:52px;object-fit:contain;object-position:left center}
+.portal-nav .brand-logo{width:175px;max-height:65px;object-position:left center}
+.auth-art .brand-logo{width:clamp(240px,32vw,410px);max-height:155px;object-position:left center}
+.auth-form-side{flex-direction:column}
+.auth-theme{display:flex;align-items:center;justify-content:flex-end;width:min(100%,410px);margin-bottom:20px}
+.portal-flower{display:block;width:min(22vw,220px);height:auto;object-fit:contain;opacity:.23;filter:invert(1);mix-blend-mode:screen}
+.portal-hero .portal-flower{position:absolute;right:7%;bottom:8%;pointer-events:none}
+html[data-theme="dark"] .portal-flower{filter:invert(1);mix-blend-mode:screen;opacity:.19}
+.sidebar .brand-flower,.portal-nav .brand-flower{filter:invert(1);mix-blend-mode:screen}
+.auth-art .brand-flower{width:88px;height:88px;filter:invert(1);mix-blend-mode:screen;opacity:.52}
+@media(max-width:760px){
+  .topbar-tools{gap:7px}
+  .theme-toggle .theme-label{display:none}
+  .mobile-brand .brand-logo-mobile{width:116px;max-height:44px}
+  .portal-nav .brand-logo{width:120px;max-height:46px}
+  .portal-hero .portal-flower{right:5%;bottom:10px;width:100px;opacity:.12}
+  .auth-art .brand-logo{width:min(73vw,270px);max-height:104px}
+  .auth-art .brand-flower{display:none}
+  .auth-theme{margin-bottom:16px}
+}

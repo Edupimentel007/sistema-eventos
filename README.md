@@ -1,6 +1,8 @@
-# Jardim — sistema de eventos
+# Paulo Guimarães — sistema de eventos
 
 Aplicação web responsiva e instalável como PWA para organização de eventos. O painel administrativo e o portal do cliente compartilham o mesmo banco persistente. Interface em português do Brasil, valores em reais e fuso padrão `America/Sao_Paulo`.
+
+A identidade visual usa a marca **Paulo Guimarães — Decorações de Eventos**: assinatura principal nos cabeçalhos e na entrada, flor secundária em detalhes e no ícone instalável. O botão de tema alterna entre claro e escuro no administrativo, no portal e na entrada; a escolha fica salva neste navegador. Os PNGs do projeto são versões preparadas a partir das imagens enviadas na conversa. Para fidelidade pixel a pixel ao material gráfico original, substitua `public/logo-principal.png` e `public/logo-flor.png` pelos arquivos oficiais.
 
 ## O que funciona
 
