@@ -53,7 +53,7 @@ $env:DATABASE_PATH = $env:DEMO_DATABASE_PATH
 npm.cmd start
 ```
 
-Ele cria o casamento fictício de Ana e Lucas, com eventos, clientes e financeiro. Contas: `proprietario@example.com`, `ana.oliveira@example.com` e `lucas.pereira@example.com`; use as senhas definidas acima. O script não altera um banco já populado. Teste o envio de fotos e contratos com arquivos seus de demonstração e use nomes e dados fictícios.
+Ele cria o casamento fictício de Ana e Lucas, com clientes, financeiro, dois fornecedores, mobiliário reservado e dois lembretes internos agendados. Contas: `proprietario@example.com`, `ana.oliveira@example.com` e `lucas.pereira@example.com`; use as senhas definidas acima. O script não altera um banco já populado. Teste o envio de fotos e contratos com arquivos seus de demonstração e use nomes e dados fictícios.
 
 ## Verificação
 

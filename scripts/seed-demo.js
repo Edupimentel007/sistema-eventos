@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { openDatabase, transaction } from '../server/db.js';
 import { hashPassword } from '../server/security.js';
+import { syncAutomations } from '../server/notifications.js';
 
 const demoPath = process.env.DEMO_DATABASE_PATH;
 if (!demoPath || demoPath === ':memory:' ||
@@ -107,7 +108,57 @@ try {
       db.prepare(`INSERT INTO financial_payment_allocations
         (payment_id, installment_id, amount_cents) VALUES (?, ?, ?)`)
         .run(paymentId, received.installmentIds[0], 7_200_000);
+
+      // Fornecedores, mobiliário e reserva do casamento para explorar os novos módulos.
+      const furnitureSupplierId = randomUUID();
+      const flowerSupplierId = randomUUID();
+      const supplierInsert = db.prepare(`INSERT INTO suppliers
+        (id, name, category, contact_name, email, phone, notes, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      supplierInsert.run(furnitureSupplierId, 'Acervo Exemplo', 'Mobiliário', 'Marina Costa',
+        'marina@example.com', '+5511999993333', 'Fornecedor fictício para demonstração.',
+        ownerId, timestamp, timestamp);
+      supplierInsert.run(flowerSupplierId, 'Flora Exemplo', 'Flores', 'Clara Souza',
+        'clara@example.com', '+5511999994444', 'Fornecedor fictício para demonstração.',
+        ownerId, timestamp, timestamp);
+      const offeringInsert = db.prepare(`INSERT INTO supplier_offerings
+        (id, supplier_id, name, category, unit, notes, position) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+      offeringInsert.run(randomUUID(), furnitureSupplierId, 'Cadeiras Chiavari', 'Cadeiras',
+        'unidade', 'Madeira clara', 1);
+      offeringInsert.run(randomUUID(), furnitureSupplierId, 'Mesas redondas', 'Mesas',
+        'unidade', '8 lugares', 2);
+      offeringInsert.run(randomUUID(), flowerSupplierId, 'Rosas brancas', 'Flores',
+        'maço', 'Sazonalidade a confirmar', 1);
+      offeringInsert.run(randomUUID(), flowerSupplierId, 'Eucalipto', 'Folhagens',
+        'maço', '', 2);
+      const chairId = randomUUID();
+      db.prepare(`INSERT INTO inventory_items
+        (id, name, category, ownership, unit, dimensions, description, supplier_id,
+         stock_quantity, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run(chairId, 'Cadeira Chiavari de madeira', 'Cadeiras', 'rental', 'unidade',
+          '45 × 90 cm', 'Modelo claro para cerimônia e recepção.', furnitureSupplierId,
+          60, ownerId, timestamp, timestamp);
+      db.prepare(`INSERT INTO inventory_movements
+        (id, item_id, kind, quantity, reason, created_by, created_at)
+        VALUES (?, ?, 'in', ?, ?, ?, ?)`)
+        .run(randomUUID(), chairId, 60, 'Estoque inicial', ownerId, timestamp);
+      db.prepare(`INSERT INTO inventory_reservations
+        (id, item_id, event_id, quantity, starts_at, ends_at, notes, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run(randomUUID(), chairId, eventId, 40, '2027-06-18T12:00:00.000Z',
+          '2027-06-21T12:00:00.000Z', 'Separação, montagem e devolução — demonstração.',
+          ownerId, timestamp, timestamp);
+      db.prepare(`INSERT INTO message_rules
+        (id, name, occasion, channel, offset_minutes, send_time, event_type,
+         subject_template, body_template, created_by, created_at, updated_at)
+        VALUES (?, ?, 'event_start', 'internal', ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run(randomUUID(), 'Lembrete do casamento — demonstração', -10080, '09:00',
+          'casamento', 'Seu casamento está chegando',
+          'Olá {cliente}, o evento {evento} acontece em {data_evento}, às {hora_evento}.',
+          ownerId, timestamp, timestamp);
     });
+    syncAutomations(db);
     console.log(`Dados fictícios criados em ${resolve(demoPath)}.`);
     console.log('Contas: proprietario@example.com, ana.oliveira@example.com e lucas.pereira@example.com.');
   }
