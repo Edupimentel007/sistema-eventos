@@ -1,6 +1,6 @@
 # Modelo inicial de dados
 
-Estado: revisão de 29/10/2026. **Etapa 1** indica entidades do primeiro fluxo funcional; **incremento financeiro** indica o módulo antecipado; **futuro** indica a extensão prevista. O esquema físico e as migrações do código são a fonte da verdade dos nomes e tipos implementados. Campos sugeridos aqui não devem ser confundidos com funcionalidade já entregue.
+Estado: revisão de 01/11/2026. **Etapa 1** indica entidades do primeiro fluxo funcional; os incrementos financeiro e de acervo indicam módulos antecipados; **futuro** indica extensões previstas. O esquema físico e as migrações do código são a fonte da verdade dos nomes e tipos implementados. Campos sugeridos aqui não devem ser confundidos com funcionalidade já entregue.
 
 ## Decisões de modelagem
 
@@ -77,12 +77,27 @@ events ── invitations / audit_log
 | Catálogo floral | `flower`, `material`, `catalog_photo`, `flower_supplier` | Nome/variedade, cores, unidade de compra e uso, fornecedor, custo de referência, disponibilidade/sazonalidade. Custos internos. |
 | Projeto visual | `event_environment`, `design_revision`, `design_item`, `design_reference`, `substitution_request` | Ambiente guarda conceito, paleta, dimensões, montagem e custo. Separar desejado, aprovado e comprado/usado. Substituição material exige nova aprovação. |
 | Compras | `requirement_line`, `purchase_order`, `material_usage` | Lista consolidada soma necessidades por unidade compatível; registra compra e uso efetivos. |
-| Acervo e fornecedores | `inventory_item`, `supplier`, `supplier_service`, `inventory_reservation` | Itens próprios/alugados, fotos, medidas, quantidades, custo, preço, contatos. Reserva cobre retirada até devolução. |
+| Evolução do acervo | Complementos de `inventory_items`, `suppliers` e `inventory_reservations` | Cadastro, fotos privadas, estoque e reservas estão no incremento antecipado descrito abaixo. Custos, preços e vínculo estruturado de serviços/contratações por evento ainda não estão implementados. |
 | Escolhas do cliente | `choice_category`, `client_choice`, `choice_access` | Vestido e outras categorias; fotos e documentos podem ser limitados a participantes específicos. |
 | Operação | `checklist_template`, `checklist`, `checklist_item`, `checklist_observation` | Quantidades previstas/separadas/carregadas/devolvidas, danos, faltas, responsável, horário e fotos. |
 | Fotos e referências | Uso de `file_asset` e `file_access` | Reutilizar a proteção da Etapa 2 para catálogo, ambientes, vestido e checklist. |
 
-Reserva conflitante: para um item, somar quantidades de reservas ativas cujos intervalos `[início da retirada, fim da devolução)` se sobrepõem. Rejeitar ou destacar quando essa soma ultrapassa a quantidade disponível. Uma consulta comercial não reserva automaticamente.
+Uma consulta comercial não reserva itens automaticamente. O incremento de acervo usa períodos semiabertos `[início, fim)` e calcula o pico simultâneo de quantidade reservada; reservas consecutivas no mesmo instante são permitidas quando a devolução termina no início da próxima retirada.
+
+## Incremento de acervo e fornecedores
+
+A migração `006_inventory.sql` acrescenta os módulos de permissão `inventory` e `suppliers` e cria as tabelas abaixo. O catálogo e o diretório são internos; cliente não recebe esses dados. A equipe precisa da permissão correspondente e, para reservas ou movimentos vinculados a evento, de `event_team`. O proprietário tem acesso completo.
+
+| Entidade | Dados centrais | Regra implementada |
+| --- | --- | --- |
+| `suppliers` | Nome, categoria, pessoa de contato, e-mail, telefone, site HTTPS, notas internas, ativo | Contato e observações ficam na área administrativa. Um fornecedor inativo continua no histórico. |
+| `supplier_offerings` | Fornecedor, nome da oferta, categoria, unidade, observação, posição | Lista estruturada do que o parceiro disponibiliza; alterações substituem a lista na mesma transação. |
+| `inventory_items` | Nome, categoria, origem própria/alugada, unidade, medidas, descrição, fornecedor, `stock_quantity`, ativo | Estoque usa unidades inteiras não negativas. Alteração de quantidade requer movimento, e item arquivado não aceita nova reserva. |
+| `inventory_movements` | Item, evento opcional, entrada/baixa, quantidade, motivo, autor e instante | Trilha imutável de entradas e baixas. Uma baixa não pode tornar o estoque negativo nem deixar reservas ativas acima da quantidade restante. |
+| `inventory_reservations` | Item, evento, quantidade, início/fim UTC, situação, observações, autor | Reservas ativas são verificadas por pico simultâneo no período. `released` e `completed` encerram a reserva, mantendo histórico. A equipe só lista reservas de seus eventos. |
+| `inventory_item_photos` | Item, nome original, MIME, tamanho, nome aleatório de armazenamento, arquivamento, autor | JPEG/PNG/WebP até 8 MB, assinatura/estrutura e extensão validadas. Arquivo fora de `public/`; download exige sessão e `inventory.read`. Remover foto faz arquivamento lógico. |
+
+Os arquivos do acervo ficam em `PRIVATE_UPLOAD_DIR/inventory` quando configurado ou em `private_uploads/inventory` ao lado do banco SQLite. O backup precisa guardar o banco e esse diretório em conjunto. A resposta pública da PWA não inclui os arquivos.
 
 ## Incremento financeiro antecipado
 
@@ -117,6 +132,7 @@ Modelos de pagamento por percentual ou valor, vencimentos relativos à data do e
 
 - A migração `001_base.sql` cria o núcleo da Etapa 1. A migração `002_client_creator.sql` adiciona `clients.created_by` e o índice para restringir a lista de clientes da equipe sem impedir a preparação de novos eventos.
 - As migrações `003_finance.sql` e `004_finance_payment_idempotency.sql` introduzem permissões financeiras, contas, parcelas, pagamentos e alocações com valores em centavos inteiros e chave para evitar pagamento duplicado em nova tentativa.
+- A migração `006_inventory.sql` introduz diretório de fornecedores, ofertas, itens do acervo, movimentos, reservas e fotos privadas, além de permissões `inventory` e `suppliers` para a equipe.
 - Cada mudança de esquema tem migração versionada e revisável. Aplicar em ordem, com backup antes de migração em produção e procedimento de retorno documentado.
 - Backup inclui banco SQLite e arquivos privados em conjunto consistente. Restaurar em ambiente de teste periodicamente e verificar acesso, anexos e registros de auditoria. Em PostgreSQL, adaptar para `pg_dump`/backup gerenciado sem alterar regras de domínio.
 - Não inserir dados de demonstração no banco real. Seeds usam pessoas e contatos fictícios e uma flag/ambiente específico.

@@ -1,6 +1,6 @@
 # Requisitos do sistema de eventos
 
-Estado: revisão de 29/10/2026. Este documento descreve o produto completo. A **Etapa 1** foi seguida por um incremento de interface responsiva e financeiro essencial, antecipado a pedido do proprietário. As partes ainda não implementadas estão em [PLANO_IMPLEMENTACAO.md](PLANO_IMPLEMENTACAO.md).
+Estado: revisão de 01/11/2026. Este documento descreve o produto completo. A **Etapa 1** foi seguida por incrementos de interface, financeiro e mensagens automáticas, antecipados a pedido do proprietário. As partes ainda não implementadas estão em [PLANO_IMPLEMENTACAO.md](PLANO_IMPLEMENTACAO.md).
 
 ## Visão do produto
 
@@ -56,6 +56,14 @@ Esta entrega amplia o administrativo e o portal sem concluir toda a Etapa 4. A n
 - **Portal:** somente contas a receber compartilhadas exibem valores informados pela equipe, parcelas e pagamentos reconhecidos. O compartilhamento pode ser para todos os clientes do evento ou restrito a um cliente. Custos previstos/realizados, contas a pagar, fornecedor e notas internas nunca entram na projeção do cliente.
 - **Limites:** pagamento é lançado manualmente após ocorrer fora do sistema. Não há cobrança bancária, comprovante por upload, conciliação, geração automática de parcelas por modelo ou renegociação contratual formal nesta entrega. Percentuais de pagamento não são fixados.
 
+## Incremento antecipado — mensagens automáticas
+
+- **Regras e ocasiões:** o proprietário configura regras globais para a data do evento ou o vencimento de parcelas a receber compartilhadas. Pode definir canal, antecedência ou atraso, horário local para parcelas, tipo de evento, assunto e texto com variáveis. Os agendamentos usam o fuso do evento e ficam persistidos no banco.
+- **Fila:** o servidor reconcilia datas, regras e consentimentos, cancela agendamentos pendentes que deixaram de ser aplicáveis e registra tentativas. Os estados são agendado, processando, enviado, falhou e cancelado. Reprocessamento manual só é oferecido quando a falha tem resultado conhecido; respostas incertas exigem conferência no provedor para evitar duplicidade.
+- **Portal:** o cliente vinculado vê mensagens internas já processadas, pode marcá-las como lidas e autorizar ou revogar individualmente e-mail e WhatsApp. Mensagens internas não geram alerta fora do portal enquanto Web Push não existir.
+- **Canais externos:** e-mail usa Resend somente com chave e remetente configurados. WhatsApp usa a Cloud API oficial da Meta somente com token, número, versão da API, modelo aprovado e telefone/consentimento adequados. O envio só é registrado após a API devolver um identificador; entrega do WhatsApp depende do webhook assinado. [MENSAGENS.md](MENSAGENS.md) documenta a conexão.
+- **Limites:** esta automação não cria reuniões nem confirma presença. Os lembretes de reunião em uma semana, um dia e cinco horas, bem como Web Push, continuam na Etapa 2. O processo Node precisa estar ativo para processar a fila no horário previsto.
+
 ## Visões consolidadas do produto completo
 
 Estas visões crescem conforme os módulos de origem são entregues. Cada cartão ou indicador deve abrir os registros que compõem seu número; um dado sem entidade persistente correspondente não deve ser exibido como se estivesse calculado.
@@ -78,7 +86,7 @@ Estas visões crescem conforme os módulos de origem são entregues. Cada cartã
 - Datas podem ser ajustadas manualmente. Evento contratado com antecedência menor que o modelo recebe alerta de etapas a reagendar. Ao alterar a data do evento, o sistema mostra impacto em tarefas, reuniões e lembretes antes de aplicar, preservando ajustes manuais quando apropriado.
 - Reuniões ordinárias e extraordinárias, presença individual com respostas **confirmo**, **não poderei comparecer** ou **solicito reagendamento**. Reagendamento e cancelamento atualizam presenças e lembretes.
 - Para cada reunião, lembretes persistentes no servidor em uma semana, um dia e cinco horas antes, somente se o instante ainda estiver no futuro. Estado de cada envio: agendado, processando, enviado, falhou ou cancelado. Reprocessamento evita duplicidade com chave idempotente. Envio externo só aparece como enviado após confirmação do provedor; confirmação de entrega é registrada apenas quando o canal a fornece. Equipe pode configurar se participantes já confirmados continuam recebendo lembretes.
-- Central interna de notificações e estrutura para Web Push. A PWA fechada só recebe aviso externo se o navegador, o sistema, a permissão, a inscrição e o serviço de push estiverem disponíveis. E-mail e WhatsApp automatizados exigem provedores configurados, consentimento e, quando aplicável, modelos de mensagem. Um link para abrir conversa no WhatsApp é rotulado **envio manual**.
+- Ampliar a central interna existente com lembretes de reuniões e estruturar Web Push. A PWA fechada só recebe aviso externo se o navegador, o sistema, a permissão, a inscrição e o serviço de push estiverem disponíveis. E-mail e WhatsApp automatizados já têm adaptadores condicionais à configuração real, ao consentimento e, quando aplicável, a modelos de mensagem. Um link para abrir conversa no WhatsApp é rotulado **envio manual**.
 
 ### Etapa 3 — Decoração e operação
 
@@ -100,7 +108,7 @@ Estas visões crescem conforme os módulos de origem são entregues. Cada cartã
 
 ### Etapa 5 — Integrações e conclusão
 
-- Canais externos habilitados somente com provedores reais e credenciais no servidor; assinatura eletrônica somente após contratação e integração efetiva.
+- Ampliar canais externos conforme a necessidade da empresa, sempre com provedores reais e credenciais no servidor; assinatura eletrônica somente após contratação e integração efetiva. Resend e Cloud API da Meta já têm adaptadores condicionais descritos em [MENSAGENS.md](MENSAGENS.md).
 - Pós-evento: devoluções, danos, perdas, acerto financeiro, pendências, fotos finais, avaliação, encerramento e arquivo.
 - Calendário completo com visões mensal, semanal, diária e lista; eventos em orçamento e contratados, reuniões, visitas, provas, montagem, desmontagem, retiradas, devoluções e tarefas. Alertas de conflitos de equipe, horário e recursos. Consulta de orçamento não bloqueia data automaticamente; reserva provisória expira.
 - Revisão ponta a ponta dos fluxos, acessibilidade, PWA, observabilidade, backup e recuperação.
@@ -116,7 +124,7 @@ Estas visões crescem conforme os módulos de origem são entregues. Cada cartã
 
 ## PWA e notificações por dispositivo
 
-A instalação melhora o acesso, mas **não é uma garantia de notificação**. A Etapa 1 não implementa notificações. Para a implementação futura, Web Push requer contexto seguro (HTTPS em produção), service worker, permissão do usuário, inscrição válida, servidor de envio operacional e políticas do navegador/sistema que permitam a entrega. A central interna planejada poderá ser consultada ao abrir o portal; ela não substituirá lembretes externos enquanto o portal estiver fechado.
+A instalação melhora o acesso, mas **não é uma garantia de notificação**. O incremento de mensagens implementa uma central interna consultada ao abrir o portal; ela não alerta o aparelho com o portal fechado. E-mail e WhatsApp dependem de configuração e consentimento. Web Push continua pendente e exigirá contexto seguro (HTTPS em produção), service worker, permissão do usuário, inscrição válida, servidor de envio operacional e políticas do navegador/sistema que permitam a entrega.
 
 | Ambiente | Limitação prática para o produto |
 | --- | --- |
@@ -139,7 +147,7 @@ As opções abaixo permitem avançar sem transformar lacunas das anotações em 
 | Pagamentos | Sem percentuais fixos; modelos editáveis por percentual ou valor. | Existem modelos usuais de entrada e saldo? |
 | Confirmações | Presença por participante; lembretes continuam ou não após confirmação conforme configuração. | Qual política padrão da empresa? |
 | Conteúdo compartilhado | Privado por padrão até liberação explícita, exceto dados básicos do evento destinados ao portal. | Quais fotos e documentos cada integrante do casal pode ver? |
-| Comunicação | Canal interno primeiro; e-mail, Web Push e WhatsApp somente após configuração/consentimento. | Qual provedor será contratado e qual canal é preferido por cliente? |
+| Comunicação | Canal interno implementado; Resend e Cloud API da Meta são opcionais e requerem configuração/consentimento. Web Push segue pendente. | Quais canais externos serão contratados e qual é a preferência de cada cliente? |
 | Assinatura | Upload e acompanhamento manual inicialmente. | Há conta e contrato de API DocuSign ou outro provedor? |
 | Arquivos | Limites de formato e tamanho definidos por configuração e infraestrutura. | Qual volume de imagens e documentos esperado? |
 | Identidade visual | Marca provisória editável. | Nome, logotipo, paleta e fotografias oficiais estão disponíveis? |

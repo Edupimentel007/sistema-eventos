@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { transaction } from './db.js';
+import { syncAutomations } from './notifications.js';
 
 const MAX_CENTS = 1_000_000_000_000;
 const MAX_INSTALLMENTS = 120;
@@ -364,6 +365,7 @@ export async function handleFinanceApi({ db, req, res, url, user, json, bodyJson
         item.dueDate, item.amountCents, timestamp, timestamp));
       audit(db, current.id, 'financial_account', id, 'created', { eventId, direction, amountCents: amount });
     });
+    syncAutomations(db);
     return json(res, 201, { account: accountDto(db, getAccount(db, user, id, fail), false, today) });
   }
 
@@ -408,6 +410,7 @@ export async function handleFinanceApi({ db, req, res, url, user, json, bodyJson
       audit(db, current.id, 'financial_account', old.id, 'updated', {
         fields: Object.keys(body), previousAmountCents: old.amount_cents });
     });
+    syncAutomations(db);
     return json(res, 200, { account: accountDto(db, getAccount(db, user, accountMatch[1], fail), false, today) });
   }
 
@@ -437,6 +440,7 @@ export async function handleFinanceApi({ db, req, res, url, user, json, bodyJson
       audit(db, current.id, 'financial_installment', installmentId, 'created', {
         accountId: account.id, amountCents: amount, dueDate });
     });
+    syncAutomations(db);
     return json(res, 201, { account: accountDto(db,
       getAccount(db, user, installmentsMatch[1], fail), false, today) });
   }
@@ -469,6 +473,7 @@ export async function handleFinanceApi({ db, req, res, url, user, json, bodyJson
         accountId: account.id, previousAmountCents: old.amount_cents,
         previousDueDate: old.due_date, amountCents: amount, dueDate });
     });
+    syncAutomations(db);
     return json(res, 200, { account: accountDto(db,
       getAccount(db, user, installmentMatch[1], fail), false, today) });
   }
@@ -525,6 +530,7 @@ export async function handleFinanceApi({ db, req, res, url, user, json, bodyJson
       audit(db, current.id, 'financial_payment', id, 'recorded', {
         accountId: account.id, eventId: account.event_id, amountCents: amount });
     });
+    if (created) syncAutomations(db);
     return json(res, created ? 201 : 200, { paymentId: resultId,
       account: accountDto(db, getAccount(db, user, paymentMatch[1], fail), false, today) });
   }
@@ -547,6 +553,7 @@ export async function handleFinanceApi({ db, req, res, url, user, json, bodyJson
         .run(new Date().toISOString(), reason, payment.id);
       audit(db, current.id, 'financial_payment', payment.id, 'voided', { accountId, reason });
     });
+    syncAutomations(db);
     return json(res, 200, { account: accountDto(db, getAccount(db, user, accountId, fail), false, today) });
   }
 

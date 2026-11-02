@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -50,8 +50,9 @@ function eventPayload(clientIds, name = 'Casamento Ana') {
 test('migração financeira atualiza banco da etapa anterior sem apagar usuários e permissões', () => {
   const dir = mkdtempSync(join(tmpdir(), 'eventos-finance-upgrade-'));
   const path = join(dir, 'old.sqlite');
+  let old; let upgraded;
   try {
-    const old = new DatabaseSync(path);
+    old = new DatabaseSync(path);
     old.exec('PRAGMA foreign_keys = ON');
     old.exec('CREATE TABLE schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)');
     for (const name of ['001_base.sql', '002_client_creator.sql']) {
@@ -65,15 +66,21 @@ test('migração financeira atualiza banco da etapa anterior sem apagar usuário
       .run(userId, new Date().toISOString());
     old.prepare(`INSERT INTO team_permissions (user_id, module, can_view, can_edit)
       VALUES (?, 'events', 1, 0)`).run(userId);
-    old.close();
-    const upgraded = openDatabase(path);
+    old.close(); old = null;
+    upgraded = openDatabase(path);
     assert.equal(upgraded.prepare(`SELECT can_view FROM team_permissions
       WHERE user_id = ? AND module = 'events'`).get(userId).can_view, 1);
     upgraded.prepare(`INSERT INTO team_permissions (user_id, module, can_view, can_edit)
       VALUES (?, 'finance', 1, 0)`).run(userId);
-    assert.equal(upgraded.prepare('SELECT COUNT(*) AS total FROM schema_migrations').get().total, 4);
-    upgraded.close();
-  } finally { rmSync(dir, { recursive: true, force: true }); }
+    const expected = readdirSync(resolve(import.meta.dirname, '..', 'migrations'))
+      .filter((name) => name.endsWith('.sql')).sort();
+    const applied = upgraded.prepare('SELECT name FROM schema_migrations ORDER BY name')
+      .all().map((row) => row.name);
+    assert.deepEqual(applied, expected);
+  } finally {
+    upgraded?.close(); old?.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('parcelas, pagamentos parciais e estornos preservam saldos em centavos', async () => {

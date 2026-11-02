@@ -1,6 +1,6 @@
 # Plano de implementação por etapas
 
-Estado: revisão de 29/10/2026. A Etapa 1 foi seguida de um incremento financeiro antecipado e uma reformulação responsiva, solicitados pelo proprietário. Cada marco só é concluído após validar seus fluxos e persistência. Os requisitos completos e as dúvidas configuráveis estão em [REQUISITOS.md](REQUISITOS.md); o desenho lógico está em [MODELO_DADOS.md](MODELO_DADOS.md). A avaliação de dispositivos está em [PWA_E_NOTIFICACOES.md](PWA_E_NOTIFICACOES.md).
+Estado: revisão de 01/11/2026. A Etapa 1 foi seguida de incrementos antecipados de financeiro, interface responsiva e acervo/fornecedores, solicitados pelo proprietário. Cada marco só é concluído após validar seus fluxos e persistência. Os requisitos completos e as dúvidas configuráveis estão em [REQUISITOS.md](REQUISITOS.md); o desenho lógico está em [MODELO_DADOS.md](MODELO_DADOS.md). A avaliação de dispositivos está em [PWA_E_NOTIFICACOES.md](PWA_E_NOTIFICACOES.md).
 
 ## Inspeção e arquitetura adotada
 
@@ -51,6 +51,14 @@ Cada etapa deve entregar ao menos um fluxo ponta a ponta. As ações principais 
 
 **Critério de saída:** proprietário cadastra conta com parcelas e registra pagamento parcial; resumo e saldo se atualizam após recarga. Cliente vinculado vê somente a cobrança compartilhada do seu evento. Integrante da equipe sem permissão financeira ou sem vínculo ao evento não acessa os valores por chamada direta. Não há cobrança bancária nem upload de comprovante neste marco.
 
+## Incremento antecipado — mobiliário, estoque e fornecedores
+
+**Escopo entregue:** o administrativo cadastra fornecedores, contatos e produtos/serviços oferecidos; cadastra itens próprios e alugados com medidas, descrição, fornecedor e foto privada; registra entradas e baixas de estoque com motivo; e reserva quantidades por evento no período de retirada até devolução. A reserva calcula o pico de itens simultaneamente comprometidos e rejeita quantidade insuficiente. A baixa não pode romper reservas já ativas. A equipe depende de permissão `inventory` ou `suppliers`; reservas e movimentos com evento exigem vínculo em `event_team`. O cliente não acessa o catálogo interno.
+
+**Validação:** testes de API cobrem fotos autenticadas, formato e tamanho de upload, criação e edição de fornecedores/ofertas, movimentações, conflitos de período e escopo de evento da equipe. O armazenamento das fotos fica fora de `public/`; backup inclui esses arquivos e o SQLite. O controle é online e não sincroniza ações offline.
+
+**Limites deste incremento:** quantidade é inteira por item. O diretório de fornecedores ainda não está ligado de forma estruturada às despesas financeiras. Não há custo/preço no catálogo, checklist de carregamento, compra automática, controle individual de danos/devoluções ou aprovação do mobiliário pelo cliente. Esses fluxos permanecem nas etapas correspondentes.
+
 ## Etapa 2 — Comercial, planejamento e compromissos
 
 **Objetivo:** registrar o acordo comercial e coordenar o planejamento até a reunião, com confirmação e lembretes persistentes.
@@ -71,7 +79,7 @@ Cada etapa deve entregar ao menos um fluxo ponta a ponta. As ações principais 
 1. Catálogo de flores, folhagens, materiais, fotos e fornecedores, com custos internos.
 2. Ambientes com conceito, paleta, referências, flores, arranjos, vasos, medidas, custos e revisões; aprovação do cliente e substituição com nova aprovação.
 3. Lista consolidada de necessidades para compra e montagem, distinguindo opção desejada, aprovada e material usado.
-4. Acervo e mobiliário próprios/alugados, fornecedores, reservas com períodos completos e alerta de falta/conflito.
+4. Complementar o acervo e as reservas já entregues com custos, preços, vínculo de contratação e aprovação do mobiliário pelo cliente.
 5. Escolhas do cliente, incluindo vestido, e controle de foto sensível por participante.
 6. Checklists reutilizáveis de carregamento, montagem, desmontagem e devolução, com quantidade, responsável, horário, foto e divergência. Interface móvel informa claramente quando uma ação não foi sincronizada.
 
@@ -102,7 +110,7 @@ Cada etapa deve entregar ao menos um fluxo ponta a ponta. As ações principais 
 
 ## Roteiro de demonstração evolutiva
 
-Usar um **casamento fictício** com dois contratantes e uma pessoa de equipe. Na Etapa 1, criar o evento, vincular ambos, acessar por contas separadas e observar painel/calendário/portal. No incremento financeiro, registrar conta compartilhada, parcelas, recebimento parcial e despesa interna, conferindo as visões separadas do administrativo e do portal. Na Etapa 2, registrar briefing, orçamento e sua aprovação, contrato, cronograma e reunião com respostas. Na Etapa 3, planejar flores e mobiliário, registrar aprovação, reserva e checklist. Na Etapa 4, aplicar modelos, renegociar parcelas e conferir comprovantes protegidos. Na Etapa 5, concluir devoluções e acerto. Seeds nunca usam dados reais nem habilitam integrações externas automaticamente.
+Usar um **casamento fictício** com dois contratantes e uma pessoa de equipe. Na Etapa 1, criar o evento, vincular ambos, acessar por contas separadas e observar painel/calendário/portal. No incremento financeiro, registrar conta compartilhada, parcelas, recebimento parcial e despesa interna, conferindo as visões separadas do administrativo e do portal. No incremento de acervo, cadastrar cadeiras e fornecedor, registrar quantidade e foto, reservar para o evento e tentar uma segunda reserva conflitante. Na Etapa 2, registrar briefing, orçamento e sua aprovação, contrato, cronograma e reunião com respostas. Na Etapa 3, planejar flores, aprovar mobiliário e registrar checklist. Na Etapa 4, aplicar modelos, renegociar parcelas e conferir comprovantes protegidos. Na Etapa 5, concluir devoluções e acerto. Seeds nunca usam dados reais nem habilitam integrações externas automaticamente.
 
 ## Riscos e decisões abertas
 

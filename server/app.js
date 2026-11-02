@@ -1,9 +1,12 @@
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, resolve, sep } from 'node:path';
+import { dirname, extname, resolve, sep } from 'node:path';
 import { openDatabase, transaction } from './db.js';
 import { handleFinanceApi } from './finance.js';
+import { handleMediaApi } from './media.js';
+import { handleInventoryApi } from './inventory.js';
+import { handleNotificationsApi, handleWhatsAppWebhook, startNotificationsWorker, syncAutomations } from './notifications.js';
 import {
   authenticatedUser, clearSessionCookie, createSession, hashPassword, newToken,
   revokeSession, sessionCookie, tokenHash, verifyPassword,
@@ -11,7 +14,7 @@ import {
 
 const statuses = ['orcamento', 'negociacao', 'contratado', 'em_execucao', 'concluido', 'cancelado'];
 const types = ['casamento', 'aniversario', 'corporativo', 'outro'];
-const modules = ['dashboard', 'clients', 'events', 'calendar', 'finance'];
+const modules = ['dashboard', 'clients', 'events', 'calendar', 'finance', 'inventory', 'suppliers', 'messages'];
 
 class ApiError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -378,7 +381,7 @@ function publicBaseUrl(req) {
   return `${protocol}://${req.headers.host}`;
 }
 
-async function handleApi(db, req, res, url) {
+async function handleApi(db, req, res, url, mediaRoot) {
   const method = req.method || 'GET';
   const path = url.pathname;
   if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) enforceSameOrigin(req);
@@ -551,8 +554,25 @@ async function handleApi(db, req, res, url) {
     return json(res, 200, { ok: true }, { 'Set-Cookie': clearSessionCookie(req) });
   }
 
+  if (path === '/api/webhooks/whatsapp') {
+    return handleWhatsAppWebhook({ db, req, res, url, json, fail });
+  }
   const user = requireUser(db, req);
   if (method === 'GET' && path === '/api/me') return json(res, 200, { user: userDto(db, user) });
+
+  if (path.startsWith('/api/media/')) {
+    return handleMediaApi({ db, req, res, url, user, json, fail,
+      requirePermission, requireCurrentUser, linkedClient, audit, mediaRoot });
+  }
+  if (path.startsWith('/api/inventory/') || path.startsWith('/api/suppliers')) {
+    return handleInventoryApi({ db, req, res, url, user, json, bodyJson, fail,
+      requirePermission, requireCurrentUser, audit });
+  }
+  if (path.startsWith('/api/messages') || path.startsWith('/api/portal/notifications') ||
+      path === '/api/portal/notification-preferences') {
+    return handleNotificationsApi({ db, req, res, url, user, json, bodyJson, fail,
+      requirePermission, requireCurrentUser, audit });
+  }
 
   if (path.startsWith('/api/finance') || /^\/api\/portal\/events\/[^/]+\/finance$/.test(path)) {
     return handleFinanceApi({ db, req, res, url, user, json, bodyJson, fail,
@@ -675,6 +695,7 @@ async function handleApi(db, req, res, url) {
       saveEventLinks(db, id, data);
       audit(db, current.id, 'event', id, 'created');
     });
+    syncAutomations(db);
     return json(res, 201, { event: eventDto(db, getEvent(db, id)) });
   }
 
@@ -731,6 +752,7 @@ async function handleApi(db, req, res, url) {
       }
       audit(db, current.id, 'event', existing.id, 'updated', { fields: Object.keys(body) });
     });
+    syncAutomations(db);
     return json(res, 200, { event: eventDto(db, getEvent(db, eventMatch[1])) });
   }
 
@@ -981,12 +1003,18 @@ async function serveStatic(res, pathname, publicDir) {
   res.end(content);
 }
 
-export function createApp({ dbPath, publicDir = resolve(import.meta.dirname, '..', 'public') } = {}) {
+export function createApp({ dbPath, publicDir = resolve(import.meta.dirname, '..', 'public'),
+  mediaRoot = process.env.MEDIA_ROOT || resolve(dirname(resolve(dbPath || process.env.DATABASE_PATH || 'data/events.sqlite')), 'uploads') } = {}) {
+  const resolvedPublic = resolve(publicDir), resolvedMedia = resolve(mediaRoot);
+  if (resolvedMedia === resolvedPublic || resolvedMedia.startsWith(resolvedPublic + sep)) {
+    throw new Error('MEDIA_ROOT deve ficar fora do diretório público.');
+  }
   const db = openDatabase(dbPath);
+  const stopNotifications = startNotificationsWorker(db);
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-      if (url.pathname.startsWith('/api/')) await handleApi(db, req, res, url);
+      if (url.pathname.startsWith('/api/')) await handleApi(db, req, res, url, resolvedMedia);
       else if (req.method === 'GET' || req.method === 'HEAD') await serveStatic(res, url.pathname, publicDir);
       else fail(405, 'Método não permitido.');
     } catch (error) {
@@ -998,5 +1026,5 @@ export function createApp({ dbPath, publicDir = resolve(import.meta.dirname, '..
       }
     }
   });
-  return { server, db };
+  return { server, db, stopNotifications };
 }

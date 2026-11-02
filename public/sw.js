@@ -1,5 +1,5 @@
-const CACHE = 'jardim-static-v3';
-const STATIC = ['/app.css', '/app.js', '/icon.svg', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
+const CACHE = 'jardim-static-v5';
+const STATIC = ['/app.css', '/calendar.css', '/features.css', '/app.js', '/calendar.js', '/media-ui.js', '/inventory-ui.js', '/messages-ui.js', '/icon.svg', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(STATIC)));

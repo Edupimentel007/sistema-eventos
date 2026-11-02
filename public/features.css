@@ -1,0 +1,91 @@
+.portal-quick-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.media-card{min-width:0;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:12px}
+.media-photo{display:block;aspect-ratio:4/3;background:var(--soft);overflow:hidden}
+.media-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.media-card-body{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:13px}
+.media-card-body strong{font-size:.9rem;overflow-wrap:anywhere}
+.media-card-body p{font-size:.79rem;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.media-card-body small{font-size:.7rem;line-height:1.4}
+.media-card-body .text-link{margin-top:auto}
+.contract-list{display:grid;gap:10px}
+.contract-card{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:13px 15px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+.contract-card>div:first-child{flex:1;min-width:200px}
+.contract-card strong,.contract-card small{display:block}
+.contract-card strong{font-size:.86rem;overflow-wrap:anywhere}
+.contract-card small{font-size:.72rem;line-height:1.4;margin-top:3px}
+.contract-card>.filter-panel{width:100%;border-top:1px solid var(--line)}
+.contract-card>.filter-panel>summary{padding-bottom:0}
+.media-card .text-link,.contract-card .button{min-height:40px}
+@media(max-width:760px){
+  .media-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .media-card-body{padding:10px}
+  .media-photo{aspect-ratio:1}
+  .contract-card>div:first-child{min-width:0;width:100%}
+  .contract-card>.button{width:100%}
+  .portal-quick-actions .button{width:100%}
+}
+@media(max-width:390px){.media-gallery{grid-template-columns:1fr 1fr}}
+
+.inventory-subnav{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 16px;padding:4px;width:max-content;max-width:100%;background:var(--soft);border:1px solid var(--line);border-radius:11px}
+.inventory-subnav a{padding:9px 15px;border-radius:8px;color:var(--muted);font-size:.82rem;font-weight:700}
+.inventory-subnav a.active{background:var(--paper);color:var(--ink);box-shadow:0 1px 5px #1d283018}
+.inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.inventory-card{display:flex;flex-direction:column;padding:0;overflow:hidden;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.inventory-card:hover{transform:translateY(-2px);box-shadow:0 16px 34px #1d28301b}
+.inventory-cover{height:150px;display:grid;place-items:center;background:linear-gradient(140deg,#e9eeea,#dbe6de);color:#84978b;font-family:Georgia,serif;font-size:4.5rem;overflow:hidden}
+.inventory-cover img{width:100%;height:100%;object-fit:cover}
+.inventory-card-body{display:grid;gap:5px;padding:15px 16px 10px;flex:1}
+.inventory-card-body strong{color:var(--ink);font-size:1.05rem}
+.inventory-card-body small{color:var(--muted)}
+.inventory-card-body>span{font-size:.79rem;color:var(--muted)}
+.inventory-card>.text-link{padding:0 16px 15px}
+.inventory-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.inventory-photo{overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.inventory-photo img{width:100%;aspect-ratio:1;display:block;object-fit:cover}
+.inventory-photo button{width:100%;border-radius:0}
+.inventory-reservations{display:grid;gap:0}
+.inventory-reservation{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 0;border-bottom:1px solid var(--line)}
+.inventory-reservation:last-child{border-bottom:0}
+.inventory-reservation strong,.inventory-reservation small{display:block}
+.inventory-reservation small{margin-top:4px;color:var(--muted);line-height:1.45}
+.inventory-event-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.inventory-card,.inventory-reservation,.inventory-event-links{min-width:0}
+.message-rule-list,.message-job-list{display:grid;gap:12px}
+.message-rule-card{padding:0;overflow:hidden}
+.message-rule-card>summary{display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px 12px;padding:17px 19px;cursor:pointer}
+.message-rule-card>summary::marker{color:var(--deep)}
+.message-rule-card>summary span{font-size:.78rem;color:var(--muted)}
+.message-rule-card>.message-rule-form{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;margin:0}
+.message-rule-card>p{margin:0;padding:0 19px 18px}
+.message-rule-form textarea{min-height:104px}
+.message-timing{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.message-timing input,.message-timing select{min-width:0}
+.message-job-card{padding:17px 20px}
+.message-job-top{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.message-job-top strong,.message-job-top small{display:block}
+.message-job-top small{margin-top:4px;color:var(--muted)}
+.message-job-card p{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}
+.message-job-foot{display:flex;align-items:center;flex-wrap:wrap;gap:7px 16px;font-size:.73rem;color:var(--muted)}
+.message-error{color:var(--danger);overflow-wrap:anywhere}
+.message-portal-card{margin-bottom:12px}
+.message-portal-card.unread{border-left:4px solid var(--deep)}
+.message-portal-card p{white-space:pre-wrap;overflow-wrap:anywhere}
+.badge.message-scheduled,.badge.message-processing{background:#e9edf0;color:#475966}
+.badge.message-sent{background:#e9f1eb;color:#37694b}
+.badge.message-failed{background:#f8e8e7;color:#93483f}
+.badge.message-cancelled{background:var(--soft);color:var(--muted)}
+@media(max-width:760px){
+  .inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .inventory-cover{height:118px}
+  .inventory-card-body{padding:11px 12px 8px}
+  .inventory-card-body strong{font-size:.88rem}
+  .inventory-card>.text-link{padding:0 12px 12px}
+  .inventory-reservation{align-items:stretch;flex-direction:column}
+  .inventory-reservation .page-actions{display:grid;grid-template-columns:1fr 1fr}
+  .message-job-top{align-items:start}
+  .message-timing{grid-template-columns:1fr 1fr}
+  .message-timing input{grid-column:1/-1}
+  .portal-nav .nav-actions>a[href='/portal/notificacoes']{display:inline-flex;font-size:.76rem}
+}
+@media(max-width:390px){.inventory-grid{grid-template-columns:1fr 1fr}.inventory-cover{height:100px}}
