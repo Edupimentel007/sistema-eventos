@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: paulo-guimaraes-api
+    runtime: node
+    plan: 0.5c-512mb
+    region: virginia
+    branch: main
+    buildCommand: npm test && npm run check
+    startCommand: npm start
+    healthCheckPath: /api/health
+    initialDeployHook: npm run bootstrap:owner
+    disk:
+      name: eventos-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.1
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_PATH
+        value: /var/data/events.sqlite
+      - key: MEDIA_ROOT
+        value: /var/data/uploads
+      - key: PRIVATE_UPLOAD_DIR
+        value: /var/data/private_uploads
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: NOTIFICATIONS_WORKER
+        value: "true"
+      - key: DEFAULT_TIMEZONE
+        value: America/Sao_Paulo
+      - key: BRAND_NAME
+        value: Paulo Guimarães
+      - key: OWNER_NAME
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_PASSWORD
+        sync: false

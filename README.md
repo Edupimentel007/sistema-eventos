@@ -19,6 +19,8 @@ Node.js 24 ou superior, servidor HTTP nativo, SQLite (`node:sqlite`) com migraç
 
 A configuração atual usa um processo Node e um volume persistente. Para mais instâncias ou maior concorrência, planeje PostgreSQL e um worker de notificações separado. A instalação da PWA não oferece funcionamento offline nem garante notificações fora do portal. Consulte [docs/PWA_E_NOTIFICACOES.md](docs/PWA_E_NOTIFICACOES.md).
 
+Para publicação com dados reais, consulte [o guia Vercel e Render](docs/DEPLOY_VERCEL.md). O banco e os anexos exigem disco persistente e a conta Vercel Hobby não permite uso comercial.
+
 ## Primeira execução
 
 No PowerShell, dentro do repositório:

@@ -370,7 +370,9 @@ function enforceSameOrigin(req) {
   const origin = req.headers.origin;
   if (!origin) return;
   try {
-    if (new URL(origin).host === req.headers.host) return;
+    const requestOrigin = new URL(origin);
+    if (requestOrigin.host === req.headers.host) return;
+    if (process.env.APP_BASE_URL && requestOrigin.origin === new URL(process.env.APP_BASE_URL).origin) return;
   } catch { /* rejeita abaixo */ }
   fail(403, 'Origem da requisição não permitida.');
 }
